@@ -1,0 +1,17 @@
+= Mathematical Approaches to Software
+
+== Prelude
+
+This module provides an introduction to two algebraic topics with a theme of driving clean software design.
+
+Some of the highest quality production software I have observed is highly tied to mathematical concepts such as these. The resultant software is well defined and easy to reason. Data structures are well defined and functions avoid compounding complexity due to operations being well expressed.
+
+The first topic, boolean algebra, provides a foundational overview paired with critique on clean, real world applications.
+
+The second topic is theoretical yet guides thinking on how to design clean systems.
+
+Links:
+
+* link:./AlgebraicSpecification/README.adoc[Algebraic Specification]
+* link:./BooleanAlgebra/README.adoc[Boolean Algebra]
+

@@ -2,8 +2,7 @@
 
 :imagesdir: ./images
 
-[NOTE]
-====
+
 This repository is a commitment from me to a group of Software Engineers at the company I work for; to run weekly training sessions with an end goal of growing their careers.
 
 This results in the outlined pathway being curated specifically to those Engineers and their career desires. This is open-sourced with the hopes it may provide useful to other engineers.
@@ -13,14 +12,19 @@ The modules will be iteratively added as the sessions commence over time.
 Admittedly, the initial modules will focus on Technical Foundational skills through language specific verbatim, which is an acceptable constraint considering the Engineers wish to learn TypeScript. Future sessions will progress to broader subjects such as best practices, leadership, collaboration and thinking critically about solutioning valuable business problems.
 
 *This is a work in progress. Information will be missing.*
-====
 
+====
 Each week a new module will be added for the next subject in the pathway. *The pathway is only a rough estimate and may change.*
 
 Each module will have some form of interactive element for the audience, however expect the structure of modules to change.
 
 A prerequisite for each module is to install https://taskfile.dev/installation[Task].
+====
 
 NOTE: The latter stages are yet to be planned out.
 
 image::high-level-pathway.png[]
+
+Chronological List:
+
+* link:./modules/TechnicalFoundations/MathematicalApproachesToSoftware/README.adoc[Week 1 Mathematical Approaches to Software]
