@@ -1,0 +1,155 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="400pt" height="445pt" viewBox="0.00 0.00 400.00 445.00">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 441)">
+<title>KarnaughMap</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-441 396,-441 396,4 -4,4"/>
+<!-- dummy0 -->
+<!-- c0 -->
+<g id="node2" class="node">
+<title>c0</title>
+<text text-anchor="middle" x="36" y="-106" font-family="Courier,monospace" font-size="10.00">10</text>
+</g>
+<!-- r0c0 -->
+<g id="node7" class="node">
+<title>r0c0</title>
+<polygon fill="none" stroke="black" points="152,-145 80,-145 80,-73 152,-73 152,-145"/>
+</g>
+<!-- c0&#45;&gt;r0c0 -->
+<!-- c1 -->
+<g id="node3" class="node">
+<title>c1</title>
+<text text-anchor="middle" x="36" y="-179" font-family="Courier,monospace" font-size="10.00">11</text>
+</g>
+<!-- r0c1 -->
+<g id="node8" class="node">
+<title>r0c1</title>
+<polygon fill="none" stroke="black" points="152,-218 80,-218 80,-146 152,-146 152,-218"/>
+<text text-anchor="middle" x="116" y="-179" font-family="Courier,monospace" font-size="10.00">three</text>
+</g>
+<!-- c1&#45;&gt;r0c1 -->
+<!-- c2 -->
+<g id="node4" class="node">
+<title>c2</title>
+<text text-anchor="middle" x="36" y="-252" font-family="Courier,monospace" font-size="10.00">01</text>
+</g>
+<!-- r0c2 -->
+<g id="node9" class="node">
+<title>r0c2</title>
+<polygon fill="none" stroke="black" points="152,-291 80,-291 80,-219 152,-219 152,-291"/>
+</g>
+<!-- c2&#45;&gt;r0c2 -->
+<!-- c3 -->
+<g id="node5" class="node">
+<title>c3</title>
+<text text-anchor="middle" x="36" y="-325" font-family="Courier,monospace" font-size="10.00">00</text>
+</g>
+<!-- r0c3 -->
+<g id="node10" class="node">
+<title>r0c3</title>
+<polygon fill="none" stroke="black" points="152,-364 80,-364 80,-292 152,-292 152,-364"/>
+<text text-anchor="middle" x="116" y="-325" font-family="Courier,monospace" font-size="10.00">one</text>
+</g>
+<!-- c3&#45;&gt;r0c3 -->
+<!-- r0 -->
+<g id="node6" class="node">
+<title>r0</title>
+<text text-anchor="middle" x="116" y="-398" font-family="Courier,monospace" font-size="10.00">00</text>
+</g>
+<!-- r1c0 -->
+<g id="node12" class="node">
+<title>r1c0</title>
+<polygon fill="none" stroke="black" points="232,-145 160,-145 160,-73 232,-73 232,-145"/>
+<text text-anchor="middle" x="196" y="-106" font-family="Courier,monospace" font-size="10.00">two</text>
+</g>
+<!-- r0c0&#45;&gt;r1c0 -->
+<!-- r1c1 -->
+<g id="node13" class="node">
+<title>r1c1</title>
+<polygon fill="none" stroke="black" points="232,-218 160,-218 160,-146 232,-146 232,-218"/>
+<text text-anchor="middle" x="196" y="-179" font-family="Courier,monospace" font-size="10.00">three</text>
+</g>
+<!-- r0c1&#45;&gt;r1c1 -->
+<!-- r1c2 -->
+<g id="node14" class="node">
+<title>r1c2</title>
+<polygon fill="none" stroke="black" points="232,-291 160,-291 160,-219 232,-219 232,-291"/>
+</g>
+<!-- r0c2&#45;&gt;r1c2 -->
+<!-- r1c3 -->
+<g id="node15" class="node">
+<title>r1c3</title>
+<polygon fill="none" stroke="black" points="232,-364 160,-364 160,-292 232,-292 232,-364"/>
+<text text-anchor="middle" x="196" y="-325" font-family="Courier,monospace" font-size="10.00">one</text>
+</g>
+<!-- r0c3&#45;&gt;r1c3 -->
+<!-- r1 -->
+<g id="node11" class="node">
+<title>r1</title>
+<text text-anchor="middle" x="196" y="-398" font-family="Courier,monospace" font-size="10.00">01</text>
+</g>
+<!-- r2c0 -->
+<g id="node17" class="node">
+<title>r2c0</title>
+<polygon fill="none" stroke="black" points="312,-145 240,-145 240,-73 312,-73 312,-145"/>
+<text text-anchor="middle" x="276" y="-106" font-family="Courier,monospace" font-size="10.00">two</text>
+</g>
+<!-- r1c0&#45;&gt;r2c0 -->
+<!-- r2c1 -->
+<g id="node18" class="node">
+<title>r2c1</title>
+<polygon fill="none" stroke="black" points="312,-218 240,-218 240,-146 312,-146 312,-218"/>
+</g>
+<!-- r1c1&#45;&gt;r2c1 -->
+<!-- r2c2 -->
+<g id="node19" class="node">
+<title>r2c2</title>
+<polygon fill="none" stroke="black" points="312,-291 240,-291 240,-219 312,-219 312,-291"/>
+<text text-anchor="middle" x="276" y="-252" font-family="Courier,monospace" font-size="10.00">two</text>
+</g>
+<!-- r1c2&#45;&gt;r2c2 -->
+<!-- r2c3 -->
+<g id="node20" class="node">
+<title>r2c3</title>
+<polygon fill="none" stroke="black" points="312,-364 240,-364 240,-292 312,-292 312,-364"/>
+<text text-anchor="middle" x="276" y="-325" font-family="Courier,monospace" font-size="10.00">two</text>
+</g>
+<!-- r1c3&#45;&gt;r2c3 -->
+<!-- r2 -->
+<g id="node16" class="node">
+<title>r2</title>
+<text text-anchor="middle" x="276" y="-398" font-family="Courier,monospace" font-size="10.00">11</text>
+</g>
+<!-- r3c0 -->
+<g id="node22" class="node">
+<title>r3c0</title>
+<polygon fill="none" stroke="black" points="392,-145 320,-145 320,-73 392,-73 392,-145"/>
+<text text-anchor="middle" x="356" y="-106" font-family="Courier,monospace" font-size="10.00">four</text>
+</g>
+<!-- r2c0&#45;&gt;r3c0 -->
+<!-- r3c1 -->
+<g id="node23" class="node">
+<title>r3c1</title>
+<polygon fill="none" stroke="black" points="392,-218 320,-218 320,-146 392,-146 392,-218"/>
+<text text-anchor="middle" x="356" y="-179" font-family="Courier,monospace" font-size="10.00">four</text>
+</g>
+<!-- r2c1&#45;&gt;r3c1 -->
+<!-- r3c2 -->
+<g id="node24" class="node">
+<title>r3c2</title>
+<polygon fill="none" stroke="black" points="392,-291 320,-291 320,-219 392,-219 392,-291"/>
+<text text-anchor="middle" x="356" y="-252" font-family="Courier,monospace" font-size="10.00">two</text>
+</g>
+<!-- r2c2&#45;&gt;r3c2 -->
+<!-- r3c3 -->
+<g id="node25" class="node">
+<title>r3c3</title>
+<polygon fill="none" stroke="black" points="392,-364 320,-364 320,-292 392,-292 392,-364"/>
+<text text-anchor="middle" x="356" y="-325" font-family="Courier,monospace" font-size="10.00">two</text>
+</g>
+<!-- r2c3&#45;&gt;r3c3 -->
+<!-- r3 -->
+<g id="node21" class="node">
+<title>r3</title>
+<text text-anchor="middle" x="356" y="-398" font-family="Courier,monospace" font-size="10.00">10</text>
+</g>
+</g>
+</svg>

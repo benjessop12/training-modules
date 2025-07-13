@@ -1,0 +1,693 @@
+== On Boolean Algebra
+
+:imagesdir: ./images
+
+Boolean Algebra is a mathematical system dealing with logical operations and binary values. It's the foundation of how computers make decisions, handle conditions and process logic and is a foundational part of algebraic specifications.
+
+There are three basic operations:
+
+[%header,cols="1,1,2"]
+|===
+|Operation
+|JavaScript symbol
+|TypeScript Example
+
+| _Negation_ (`NOT`)
+| `!`
+a|
+```ts
+let isTrue: boolean = true
+console.log(!isTrue) // Outputs: false
+```
+
+| _Conjunction:_ (`AND`)
+|`&&`
+a|
+```ts
+let isTrue: boolean = true
+let isFalse: boolean = false
+
+console.log(isTrue && isFalse) // Outputs: false
+```
+
+|_Disjunction_ (`OR`)
+|`\|\|`
+a|
+```ts
+let isTrue: boolean = true
+let isFalse: boolean = false
+
+console.log(isTrue \|\| isFalse) // Outputs: true
+```
+|===
+
+Expressions such as the ones in the examples represent that every element has a complement (it's inverse):
+
+ * The complement of `0` is `1`
+ * The complement of `1` is `0`.
+
+---
+The rules of Boolean Algebra are represented through this formal notation:
+
+image::boolean-algebra-notation.png[]
+
+
+This expression informs use of how `true`, `false`, `&&`, `||` and `!` work.
+
+`(A,∨,∧,0,1,⇒)` can be thought of as a type signature. It is a complemented lattice consisting:
+
+* `A` represents possible set values `{0, 1}` OR `{false, true}`
+* two binary operations
+** `∨` represents disjunction (`OR`)
+** `∧` represents conjunction (`AND`)
+* two special elements
+** `0` is the minimum value (`false`)
+** `1` is the maximum value (`true`)
+* a unary operation
+** `⇒` the _implication_
+
+`⇒  : A × A → A` _implies_ a binary operation takes one element from `A` (either `0` or `1`) and returns one element in `A` (either `0` or `1`).
+
+`x ⇒ y = x′ ∨ y` represents (if `X` is `true` then `y`) is equivalent to (the complement operation of `X` OR `y`)
+
+---
+
+== How to apply this to Software Engineering
+
+Throughout your career you will encounter codebases that have evolved over many years or decades. Engineers cycle in-and-out of the company, requirements evolve and styles are inconsistent. The demand to add features increases resulting in _additional_ code as opposed to discovering and refactoring existing code. Feature flagging is adopted as a practice without educating engineers how each flag evaluation is an additional boolean often resulting in a sub-system nested within the application. Developers will patch bugs or add additional cases. Naturally these scenario result in multiple conditionals and bloat.
+
+An understated way to keep code maintainable is more elegant handling of boolean algebra following these paradigms. The more conditions the more shaping that will be required:
+
+=== Examples with two conditions
+
+**Negation (`NOT`) converts the conjunction (`AND`):**
+
+Using https://en.wikipedia.org/wiki/De_Morgan%27s_laws[De Morgans Law] this code:
+```ts
+const checkCondition = (x: boolean, y: boolean): boolean => {
+  !(x && y)
+}
+```
+
+Can be rewritten as:
+```ts
+const checkCondition = (x: boolean, y: boolean): boolean => {
+  !x || !y
+}
+```
+
+This simplifies the logical flow, improves readability and reduces nesting in conditional logic. The explicit negates each operand aiding in maintenance and comprehension.
+
+=== Examples with three conditions
+
+*Logical conjunction ( `AND` ) distributes over the disjunction ( `OR` ):*
+
+This code:
+```ts
+const checkCondition = (x: boolean, y: boolean, z: boolean): boolean => {
+  x && (y || z)
+}
+```
+
+Becomes the more expressive:
+
+```ts
+const checkCondition = (x: boolean, y: boolea, z: boolean): boolean => {
+  (x && y) || (x && z)
+}
+```
+
+.Output Matrix:
+[%collapsible]
+====
+[%header,cols="1,1,1,2"]
+|===
+|`x`
+|`y`
+|`z`
+|Output
+
+|`true`
+|`true`
+|`true`
+|`true`
+
+|`true`
+|`true`
+|`false`
+|`true`
+
+|`true`
+|`false`
+|`true`
+|`true`
+
+|`true`
+|`false`
+|`false`
+|`false`
+
+|`false`
+|`true`
+|`true`
+|`false`
+
+|`false`
+|`true`
+|`false`
+|`false`
+
+|`false`
+|`false`
+|`true`
+|`false`
+
+|`false`
+|`false`
+|`false`
+|`false`
+|===
+====
+
+
+*Disjunction (`OR`) distributes over conjunction (`AND`):*
+
+This code:
+```ts
+const checkCondition = (x: boolean, y: boolean, z: boolean): boolean => {
+  x || (y && z)
+}
+```
+
+Becomes the more expressive:
+```ts
+const checkCondition = (x: boolean, y: boolean, z: boolean): boolean => {
+ (x || y) && (x || z)
+}
+```
+
+.Output Matrix:
+[%collapsible]
+====
+[%header,cols="1,1,1,2"]
+|===
+|`x`
+|`y`
+|`z`
+|Output
+
+|`true`
+|`true`
+|`true`
+|`true`
+
+|`true`
+|`true`
+|`false`
+|`true`
+
+|`true`
+|`false`
+|`true`
+|`true`
+
+|`true`
+|`false`
+|`false`
+|`true`
+
+|`false`
+|`true`
+|`true`
+|`true`
+
+|`false`
+|`true`
+|`false`
+|`false`
+
+|`false`
+|`false`
+|`true`
+|`false`
+
+|`false`
+|`false`
+|`false`
+|`false`
+|===
+====
+
+[TIP]
+====
+🧪 If you are coding at home get the following command to no longer error:
+
+```bash
+cd modules/TechnicalFoundations/MathematicalApproachesToSoftware/BooleanAlgebra/test-application
+npm run test-case-one
+```
+
+_You will need to edit `inMemoryModelStore.ts` to get this eslint rule passing._
+====
+
+=== Examples with increased complexity
+
+I've recently been working in a complex billing codebase that's evolved over 20 years and it's not uncommon to see complex boolean expressions distributed across various modules/classes. The following example represents such complexity in a consolidated function (for ease of representation):
+
+```java
+@PinkyExtended("Verbatim")
+public void someImpureFunction() {
+  if (MyFeatureFlagProvider.isFlagEnabled("this-was-never-enabled")) {
+    if (!TenantConfiguration.isFeatureXPresent()) {
+      // call function two
+    }
+  } else {
+    if (!TenantConfiguration.isFeatureXPresent()) {
+      // call function one
+    }
+    if (someOldPredicate()) {
+      // call function three
+    }
+  }
+  if (MyFeatureFlagProvider.isFlagEnabled("everyone-who-understood-the-intent-has-left-and-nothing-was-documented")) {
+    if (TenantConfiguration.isFeatureXPresent()) {
+      if (!someOldPredicate()) {
+        // Call function two
+      }
+    }
+  } else {
+    if (MyFeatureFlagProvider.isFlagEnabled("this-was-never-enabled") && TenantConfiguration.isFeatureXPresent()) {
+      // Call function four
+    }
+  }
+}
+```
+
+Engineers will want to solve wider issues of Feature Flag mismanagement and having tenant specific configurations, however shifting practice changes takes time where a pragmatic approach would be to asynchronously tackle those problems whilst also improving the code legibility. Refactors with such complexity require more efficient design where De Morgan's Theories fall short. Enter https://en.wikipedia.org/wiki/Karnaugh_map[Karnaugh Maps] which are useful to simplify circuits with up to 4 variables.
+
+A Karnaugh Map is a graphical representation of boolean functions based on the concept of distance. It recognises adjacent minterms with a distance of `1` to minimise the number of logical operations required in a circuit.
+
+[note]
+====
+_On distance_:
+
+* `Distance(xyz, xyz')=1` as only `z` and it's complement are different
+* `Distance(xyz, xy'z')=2` as both `y` and `z` and their respective complements are different
+====
+
+Here's a Karnaugh Map of our Pinky Extended example, where:
+
+* The top values represent the values for the feature flags `this-was-never-enabled` and `everyone-who-understood-the-intent-has-left-and-nothing-was-documented`
+* The left values represent the conditions for the `TenantConfiguration` and `someOldPredicate`
+
+[note]
+====
+For example, `01` on the left hand side represents !`TenantConfiguration` and `someOldPredicate`
+
+*Of critical importance* is how the third and firth row and columns have been ordered; differing by 1 bit instead of sequential binary number ordering.
+====
+
+image::karnaugh-map.svg[Static, 750]
+
+.GraphViz dot:
+[%collapsible]
+====
+digraph KarnaughMap {
+    node [shape=box width=1 height=1 fontname="Courier" fontsize=10];
+    rankdir=LR;
+    graph [splines=false nodesep=0 ranksep=0];
+
+    dummy0 [label="", style=invis, width=0.1];
+    c0 [label="10", shape=plaintext];
+    c1 [label="11", shape=plaintext];
+    c2 [label="01", shape=plaintext];
+    c3 [label="00", shape=plaintext];
+
+    {rank=same; dummy0; c0; c1; c2; c3;}
+
+    r0 [label="00", shape=plaintext];
+    r0c0 [label=""];
+    r0c1 [label="three"];
+    r0c2 [label=""];
+    r0c3 [label="one"];
+
+    r1 [label="01", shape=plaintext];
+    r1c0 [label="two"];
+    r1c1 [label="three"];
+    r1c2 [label=""];
+    r1c3 [label="one"];
+
+    r2 [label="11", shape=plaintext];
+    r2c0 [label="two"];
+    r2c1 [label=""];
+    r2c2 [label="two"];
+    r2c3 [label="two"];
+
+    r3 [label="10", shape=plaintext];
+    r3c0 [label="four"];
+    r3c1 [label="four"];
+    r3c2 [label="two"];
+    r3c3 [label="two"];
+
+    {rank=same; r0; r0c0; r0c1; r0c2; r0c3;}
+    {rank=same; r1; r1c0; r1c1; r1c2; r1c3;}
+    {rank=same; r2; r2c0; r2c1; r2c2; r2c3;}
+    {rank=same; r3; r3c0; r3c1; r3c2; r3c3;}
+
+    {rank=same; r0;}
+    {rank=same; r1;}
+    {rank=same; r2;}
+    {rank=same; r3;}
+
+    c0 -> r0c0 [style=invis];
+    c1 -> r0c1 [style=invis];
+    c2 -> r0c2 [style=invis];
+    c3 -> r0c3 [style=invis];
+
+    r0c0 -> r1c0 [style=invis];
+    r1c0 -> r2c0 [style=invis];
+    r2c0 -> r3c0 [style=invis];
+
+    r0c1 -> r1c1 [style=invis];
+    r1c1 -> r2c1 [style=invis];
+    r2c1 -> r3c1 [style=invis];
+
+    r0c2 -> r1c2 [style=invis];
+    r1c2 -> r2c2 [style=invis];
+    r2c2 -> r3c2 [style=invis];
+
+    r0c3 -> r1c3 [style=invis];
+    r1c3 -> r2c3 [style=invis];
+    r2c3 -> r3c3 [style=invis];
+}
+====
+
+[note]
+====
+For mapping simplicity let's assign:
+
+A. MyFeatureFlagProvider.isFlagEnabled("this-was-never-enabled")
+B. MyFeatureFlagProvider.isFlagEnabled("everyone-who-understood-the-intent-has-left-and-nothing-was-documented")
+C. TenantConfiguration.isFeatureXPresent()
+D. someOldPredicate()
+====
+
+Using the pinky extended example, each populated combination in the map identifies where the output is `true` and a function should be invoked.
+
+* Function one is called when `A` and `C` are `false`. `B` and `D` are not implicating.
+* Function two is called when:
+** `A` is `true` and `C` is `false`
+** `B` and `C` are `true` and `D` is `false`
+* Function three is called when `A` is `false` and `D` is `true`.
+* Function four is called when `A` and `C` are `true` and `B` is `false`.
+
+The next step is to group adjacent minterms.
+
+*Definition of a group*
+
+* Number of components in a group must be within the power of 2, as in each group must encapsulate either 1, 2, 4, 8 squares within the map.
+* Adjacency is defined as either the top, bottom, left or right cell.
+* Groups can wrap around edges of the map.
+
+
+*Rules of a group*
+
+* Cannot cover a `true` causing a different output; branches cannot cover other branches.
+* Include as many `true` values as possible.
+* Each `true` must be included in _at least_ one group.
+* Groups can overlap if not violating another rule.
+* May cover voids.
+* Must be the largest group as possible to lead to simpler expressions.
+
+Once the groups are identified you derive the simplified expression.
+
+Using our prior karnaugh map, we will identify the groups for both the first and second functions with workings and show the output groups for the third and fourth without workings:
+
+*Frist group expanded as identified by the blue squares:*
+
+image::karnaugh-map-group-one.svg[]
+
+.GraphViz dot:
+[%collapsible]
+====
+digraph KarnaughMap {
+    node [shape=box width=1 height=1 fontname="Courier" fontsize=10];
+    rankdir=LR;
+    graph [splines=false nodesep=0 ranksep=0];
+
+    dummy0 [label="", style=invis, width=0.1];
+    c0 [label="10", shape=plaintext];
+    c1 [label="11", shape=plaintext];
+    c2 [label="01", shape=plaintext];
+    c3 [label="00", shape=plaintext];
+
+    {rank=same; dummy0; c0; c1; c2; c3;}
+
+    r0 [label="00", shape=plaintext];
+    r0c0 [label=""];
+    r0c1 [label="X"];
+    r0c2 [label="", style=filled, fillcolor=lightblue];
+    r0c3 [label="one", style=filled, fillcolor=lightblue];
+
+    r1 [label="01", shape=plaintext];
+    r1c0 [label="X"];
+    r1c1 [label="X"];
+    r1c2 [label="", style=filled, fillcolor=lightblue];
+    r1c3 [label="one", style=filled, fillcolor=lightblue];
+
+    r2 [label="11", shape=plaintext];
+    r2c0 [label="X"];
+    r2c1 [label=""];
+    r2c2 [label="X"];
+    r2c3 [label="X"];
+
+    r3 [label="10", shape=plaintext];
+    r3c0 [label="X"];
+    r3c1 [label="X"];
+    r3c2 [label="X"];
+    r3c3 [label="X"];
+
+    {rank=same; r0; r0c0; r0c1; r0c2; r0c3;}
+    {rank=same; r1; r1c0; r1c1; r1c2; r1c3;}
+    {rank=same; r2; r2c0; r2c1; r2c2; r2c3;}
+    {rank=same; r3; r3c0; r3c1; r3c2; r3c3;}
+
+    {rank=same; r0;}
+    {rank=same; r1;}
+    {rank=same; r2;}
+    {rank=same; r3;}
+
+    c0 -> r0c0 [style=invis];
+    c1 -> r0c1 [style=invis];
+    c2 -> r0c2 [style=invis];
+    c3 -> r0c3 [style=invis];
+
+    r0c0 -> r1c0 [style=invis];
+    r1c0 -> r2c0 [style=invis];
+    r2c0 -> r3c0 [style=invis];
+
+    r0c1 -> r1c1 [style=invis];
+    r1c1 -> r2c1 [style=invis];
+    r2c1 -> r3c1 [style=invis];
+
+    r0c2 -> r1c2 [style=invis];
+    r1c2 -> r2c2 [style=invis];
+    r2c2 -> r3c2 [style=invis];
+
+    r0c3 -> r1c3 [style=invis];
+    r1c3 -> r2c3 [style=invis];
+    r2c3 -> r3c3 [style=invis];
+}
+====
+
+* This group does not cover another branch.
+* Covers the voids it can to result in the largest group.
+
+Using the map we identify the simplest expression. Taking the map at face value the code may look like:
+
+```java
+public static boolean firstPredicate(boolean a, boolean b, boolean c, boolean d) {
+    return (!a && !b && !c && !d) || // Row 0 Column 0
+            (!a && b && !c && !d) ||  // Row 0 Column 1
+            (!a && !b && !c && d) ||  // Row 1 Column 0
+            (!a && b && !c && d);     // Row 1 Column 1
+}
+```
+
+In all expressions all `b` and `d` values and their complements are interchangeable and defined as 'non implicating'. `a` and `c` are the constants that represent the reduce condition:
+
+```java
+public static boolean firstPredicate(boolean a, boolean _b, boolean c, boolean _d) {
+    return !a && !c;
+}
+```
+
+NOTE: The reason is free to write this expression in a more intuitive manner, perhaps reducing the parameters to only take `a` and `c`.
+
+*Second group expanded as identified by the blue squares:*
+
+image::karnaugh-map-group-two.svg[]
+
+.GraphViz dot:
+[%collapsible]
+====
+digraph KarnaughMap {
+    node [shape=box width=1 height=1 fontname="Courier" fontsize=10];
+    rankdir=LR;
+    graph [splines=false nodesep=0 ranksep=0];
+
+    dummy0 [label="", style=invis, width=0.1];
+    c0 [label="10", shape=plaintext];
+    c1 [label="11", shape=plaintext];
+    c2 [label="01", shape=plaintext];
+    c3 [label="00", shape=plaintext];
+
+    {rank=same; dummy0; c0; c1; c2; c3;}
+
+    r0 [label="00", shape=plaintext];
+    r0c0 [label=""];
+    r0c1 [label="X"];
+    r0c2 [label=""];
+    r0c3 [label="X"];
+
+    r1 [label="01", shape=plaintext];
+    r1c0 [label="two", style=filled, fillcolor=lightblue];
+    r1c1 [label="X"];
+    r1c2 [label=""];
+    r1c3 [label="X"];
+
+    r2 [label="11", shape=plaintext];
+    r2c0 [label="two", style=filled, fillcolor=lightblue];
+    r2c1 [label=""];
+    r2c2 [label="two", style=filled, fillcolor=lightblue];
+    r2c3 [label="two", style=filled, fillcolor=lightblue];
+
+    r3 [label="10", shape=plaintext];
+    r3c0 [label="X"];
+    r3c1 [label="X"];
+    r3c2 [label="two", style=filled, fillcolor=lightblue];
+    r3c3 [label="two", style=filled, fillcolor=lightblue];
+
+    {rank=same; r0; r0c0; r0c1; r0c2; r0c3;}
+    {rank=same; r1; r1c0; r1c1; r1c2; r1c3;}
+    {rank=same; r2; r2c0; r2c1; r2c2; r2c3;}
+    {rank=same; r3; r3c0; r3c1; r3c2; r3c3;}
+
+    {rank=same; r0;}
+    {rank=same; r1;}
+    {rank=same; r2;}
+    {rank=same; r3;}
+
+    c0 -> r0c0 [style=invis];
+    c1 -> r0c1 [style=invis];
+    c2 -> r0c2 [style=invis];
+    c3 -> r0c3 [style=invis];
+
+    r0c0 -> r1c0 [style=invis];
+    r1c0 -> r2c0 [style=invis];
+    r2c0 -> r3c0 [style=invis];
+
+    r0c1 -> r1c1 [style=invis];
+    r1c1 -> r2c1 [style=invis];
+    r2c1 -> r3c1 [style=invis];
+
+    r0c2 -> r1c2 [style=invis];
+    r1c2 -> r2c2 [style=invis];
+    r2c2 -> r3c2 [style=invis];
+
+    r0c3 -> r1c3 [style=invis];
+    r1c3 -> r2c3 [style=invis];
+    r2c3 -> r3c3 [style=invis];
+}
+====
+
+The groupings cannot be expanded beyond the truth table. If they did, they would cover other branches.
+
+Again, using the map we identify the simplest expression. Taking the map at face value the code may look like:
+
+```java
+public static boolean secondPredicate(boolean a, boolean b, boolean c, boolean d) {
+    return (a && b && !c && !d) || // Row 0 Column 2
+           (a && !b && !c && !d) || // Row 0 Column 3
+           (a && b && !c && d) ||   // Row 1 Column 2
+           (a && !b && !c && d) ||  // Row 1 Column 3
+           (!a && b && c && !d) ||  // Row 3 Column 1
+           (a && b && c && !d);     // Row 3 Column 2
+}
+```
+
+Can be reduced to:
+
+```java
+public static boolean secondPredicate(boolean a, boolean b, boolean c, boolean d) {
+    return (a && !c) || (b && c && !d);
+}
+```
+
+Here are the latter predicates:
+
+```ts
+public static boolean thirdPredicate(boolean a, boolean _b, boolean c, boolean _d) {
+    return !a && c;
+}
+
+public static boolean fourthPredicate(boolean a, boolean b, boolean c, boolean _d) {
+    return a && !b && c;
+}
+```
+
+The original pinky extended example becomes:
+
+```java
+@PinkyExtended("Verbatim")
+public void someImpureFunction() {
+  final boolean a = MyFeatureFlagProvider.isFlagEnabled("this-was-never-enabled");
+  final boolean b = MyFeatureFlagProvider.isFlagEnabled("everyone-who-understood-the-intent-has-left-and-nothing-was-documented");
+  final boolean c = TenantConfiguration.isFeatureXPresent();
+  final boolean d = someOldPredicate();
+
+  if (firstPredicate(a, b, c, d)) {
+    return functionOne();
+  }
+
+  if (secondPredicate(a, b, c, d)) {
+    return functionTwo();
+  }
+
+  if (thirdPredicate(a, b, c, d)) {
+    return functionThree();
+  }
+
+  if (fourthPredicate(a, b, c, d)) {
+    return functionFour();
+  }
+
+  // throw exception
+}
+```
+
+[TIP]
+====
+*I've not added this test case yet, coming soon ™️*
+
+🧪 If you are coding at home get the following command to no longer error:
+
+```bash
+cd modules/TechnicalFoundations/MathematicalApproachesToSoftware/BooleanAlgebra/test-application
+npm run test-case-two
+```
+
+_You will need to edit `convoluted.ts` to get this eslint rule passing._
+====
+
+== Converting theory to reality
+
+Within the confines of this document this transformation was easily applied as the complexity was significantly reduced into consolidated examples. Based on the size and maturity of your organisation, applying such transformations to production deployed code may require:
+
+* Bringing engineers in your team across the theory to be confident in reviewing the change.
+* Detailed risk assessments and rollback processes.
+* Enhanced observability and monitoring tools.
+* Influence in conveying the need to allocate time to refactor complex code and monitor the change as it runs in production.
+* Being able to make trade-offs on when to refactor and when to focus on feature development.
+
+I will detail these concerns in future modules. For now, apply this mathematical approach when writing and refactoring code to best represent complex circuits in a way that is easy to reason and reduces the risk for future changes.
