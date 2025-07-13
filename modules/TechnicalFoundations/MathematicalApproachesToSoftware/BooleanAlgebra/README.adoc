@@ -51,6 +51,7 @@ The rules of Boolean Algebra are represented through this formal notation:
 
 image::boolean-algebra-notation.png[]
 
+
 This expression informs use of how `true`, `false`, `&&`, `||` and `!` work.
 
 `(A,∨,∧,0,1,⇒)` can be thought of as a type signature. It is a complemented lattice consisting:
@@ -235,6 +236,18 @@ const checkCondition = (x: boolean, y: boolean, z: boolean): boolean => {
 |`false`
 |`false`
 |===
+====
+
+[TIP]
+====
+🧪 If you are coding at home get the following command to no longer error:
+
+```bash
+cd modules/TechnicalFoundations/MathematicalApproachesToSoftware/BooleanAlgebra/test-application
+npm run test-case-one
+```
+
+_You will need to edit `inMemoryModelStore.ts` to get this eslint rule passing._
 ====
 
 === Examples with increased complexity
@@ -653,6 +666,20 @@ public void someImpureFunction() {
 }
 ```
 
+[TIP]
+====
+*I've not added this test case yet, coming soon ™️*
+
+🧪 If you are coding at home get the following command to no longer error:
+
+```bash
+cd modules/TechnicalFoundations/MathematicalApproachesToSoftware/BooleanAlgebra/test-application
+npm run test-case-two
+```
+
+_You will need to edit `convoluted.ts` to get this eslint rule passing._
+====
+
 == Converting theory to reality
 
 Within the confines of this document this transformation was easily applied as the complexity was significantly reduced into consolidated examples. Based on the size and maturity of your organisation, applying such transformations to production deployed code may require:
@@ -661,5 +688,6 @@ Within the confines of this document this transformation was easily applied as t
 * Detailed risk assessments and rollback processes.
 * Enhanced observability and monitoring tools.
 * Influence in conveying the need to allocate time to refactor complex code and monitor the change as it runs in production.
+* Being able to make trade-offs on when to refactor and when to focus on feature development.
 
 I will detail these concerns in future modules. For now, apply this mathematical approach when writing and refactoring code to best represent complex circuits in a way that is easy to reason and reduces the risk for future changes.

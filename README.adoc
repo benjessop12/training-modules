@@ -18,7 +18,7 @@ Each week a new module will be added for the next subject in the pathway. *The p
 
 Each module will have some form of interactive element for the audience, however expect the structure of modules to change.
 
-A prerequisite for each module is to install https://taskfile.dev/installation[Task].
+A prerequisite for each module is to install `node` and `npm`.
 ====
 
 NOTE: The latter stages are yet to be planned out.
