@@ -668,8 +668,6 @@ public void someImpureFunction() {
 
 [TIP]
 ====
-*I've not added this test case yet, coming soon ™️*
-
 🧪 If you are coding at home get the following command to no longer error:
 
 ```bash

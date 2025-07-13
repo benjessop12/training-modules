@@ -9,7 +9,7 @@
   "license": "MIT",
   "scripts": {
     "test-case-one": "npx eslint src/inMemoryModelStore.ts",
-    "test-case-two": "npx eslint src/inMemoryModelStore.ts",
+    "test-case-two": "npx eslint src/convoluted.ts",
     "prepare": "husky"
   },
   "keywords": [],
@@ -20,6 +20,7 @@
     "@typescript-eslint/eslint-plugin": "^8.36.0",
     "@typescript-eslint/parser": "^8.36.0",
     "eslint": "^9.31.0",
+    "espree": "^10.4.0",
     "husky": "^9.1.7",
     "jiti": "^2.4.2",
     "typescript": "^5.8.3",

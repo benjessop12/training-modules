@@ -1,3 +1,5 @@
+/* eslint local-rules/validate-karnaugh-reduction: 0 */
+
 import { Either } from 'prelude-ts'
 import type { Result } from './utility'
 

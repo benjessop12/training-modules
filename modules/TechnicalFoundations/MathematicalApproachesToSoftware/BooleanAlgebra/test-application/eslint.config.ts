@@ -12,6 +12,7 @@ export default [
 		},
 		rules: {
 			'local-rules/non-condensed-predicates': 'error',
+			'local-rules/validate-karnaugh-reduction': 'error',
 		},
 	},
 ]
