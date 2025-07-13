@@ -12,6 +12,6 @@ The second topic is theoretical yet guides thinking on how to design clean syste
 
 Links:
 
-* link:./AlgebraicSpecification/README.adoc[Algebraic Specification]
+* (Coming soon) Algebraic Specification
 * link:./BooleanAlgebra/README.adoc[Boolean Algebra]
 
