@@ -86,9 +86,3 @@ const predicateThree = (a: boolean, b: boolean, c: boolean, d: boolean): boolean
 const predicateFour = (a: boolean, b: boolean, c: boolean, d: boolean): boolean => {
 	return false
 }
-
-// Expectations:
-// predicateOne = !C
-// predicateTwo = A && C || !A && C && !D
-// predicateThree = !A && B && C && D
-// predicateFour = !A && !B && C
