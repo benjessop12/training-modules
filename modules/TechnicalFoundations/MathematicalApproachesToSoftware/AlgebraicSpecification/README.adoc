@@ -1,0 +1,167 @@
+== On Algebraic Specification
+
+:imagesdir: ./images
+
+Algebraic specification is a software engineering technique used to define the expected behaviour of abstract data types using mathematical equations. Unlike model-based specifications that describe how systems operate in terms of internal state changes, algebraic specifications describe what outcomes should be true in a declarative manner.
+
+*Problem:* Modern object-oriented programming uses _model-based specifications_ that describe objects in terms of their internal state. This is not elegant and does not match the object-oriented philosophy of focusing on describing objects through the messages they exchange.
+
+*Solution:* _algebraic specifications_; describing objects through mathematical equations rather than describing internal implementation details, such as internal state variables.
+
+*Omission:* A *complete* implementation for defining algebraic specifications does not exist for object oriented languages for valid reasons such as:
+
+* Equality operators that algebraic datatype settings rely on will differ for object comparison if they exist in different memory spaces of the object oriented program.
+* Side effects where programming methods can change the state of the objects and mathematical operations only return values.
+* Intermediate execution where mathematical operations happen in isolation versus programming operations happen between other operations.
+
+This results in specifications that require pragmatic application and reasoning when attempting to use them in real world code.
+
+---
+
+In object oriented languages such as TypeScript objects are described through classes or interfaces, listing constructors and functions available against objects that satisfy the interface. Here is a contrived example:
+
+```ts
+type ModelType = string
+
+interface DSLModel {
+  type: ModelType
+  data: DSLUnions // Undefined, some arbitrary union of interfaces
+}
+
+interface DSLModelStore {
+  put(model: DSLModel): Result<boolean>
+  get<T extends DSLUnions>(type: ModelType): Result<T[]>
+  clear(): Result<boolean>
+}
+
+const memoryStore = Map<ModelType, Map<string, DSLUnions>>()
+
+class InMemoryModelStore implements DSLModelStore {
+  put = (model: DSLModel): Result<boolean> => {
+    // store in memory store
+  }
+
+  get = <T extends DSLUnions>(type: ModelType): Result<T[]> => {
+    // fetch models of a type from the memory store
+  }
+
+  clear = (): Result<boolean> => {
+    // clear the objects from the memory store
+  }
+}
+```
+
+NOTE: Self documenting code representations require the reader to _infer_ the function of the exposed API through observing implementation details; intent is lost.
+
+To shift away from self documenting code we seek to define an algebraic specification for this object. A specification consists of sequences of equations involving operations from an abstract data type and reference nothing external to the object. In OOP, operations are interleaved so we must explicitly specify behavioural guarantees.
+
+== Specification Use Cases
+
+Using our former example we determine two possible use cases that should be represented through a specification:
+
+1. *Data Persistence:* `Put()` ing an element into the model store and applying `get()` on the store to give me a list that includes the previously 'put()' DSL Model.
+2. *Side effect free reads:* `Get()` ing from the store does not have any side-effect.
+
+In order to express the benefits of an *algebraic specification* we will first represent these use cases as *model based specifications* to show their downsides.
+
+== Model Based Specifications
+
+[NOTE]
+====
+This specification is written as a collection of https://en.wikipedia.org/wiki/Hoare_logic[Hoare triples] which describes how a piece of code changes the state of the computation int the form of `{ precondition } action { postcondition }`
+
+The use of `Result` in the `typescript` code is not represented in the specifications as it's a functional concept wrapping the postconditions. It's an implementation detail.
+====
+
+=== Use case 1
+
+```
+        { ∅ } m = new InMemoryModelStore() { m.is = {} }
+{ m.is = mm }          m.put(i)            { m.is = mm ⊕ { i.type → i :: m[i.type] } }
+{ m.is = mm }        j = m.get(T)          { j = mm[T] }
+```
+
+* The first Hoare triple expresses the initialisation of a model store, where the postcondition represents the external view of the state.
+
+* The second triple expresses how storing an object updates the state. The postcondition expresses:
+** `mm` being the current state of the model store
+** `i` being the model being inserted
+** `mm[i.type]` being the current list of models of that model type
+** `i :: m[i.type]` the new concatenated list, with `i` prepended to the front. `::` represents concatenation.
+** `{ i.type →` a singleton map associated `i.type` with the list
+** `⊕` is a https://en.wikipedia.org/wiki/Direct_sum[direct sum] acting as a map override operator, merging two maps and replacing values for shared keys
+
+* The third triple expresses fetching objects of type `T` and returning the list of models of that type.
+
+=== Use case 2
+
+```
+        { ∅ } m = new InMemoryModelStore() { m.is = {} }
+{ m.is = mm }          m.put(i)            { m.is = mm ⊕ { i.type → i :: m[i.type] } }
+{ m.is = mm }        j = m.get(T)          { m.is = mm ∧ j = mm[T] }
+```
+
+The third triple articulates how the act of reading from the store is side effect free. It's postcondition expresses:
+
+* `m.is mm` the internal state of store, entailing that it remains *unchanged* after calling `get`
+* `j = mm[T]` expressing the result `j` is the list of models stored under the type `T` in the map `mm`
+* `∧` is a logical `AND` which joins the two facts in a single postcondition.
+
+=== Why model based specifications are difficult
+
+* The object is represented by the model field `is` which hooks into an internal representation of the store. The result is a specification that is an implementation of the object's underlying behavioural specification. The specification of the store is within the terms of the underlying `Map` object, which is inaccurate.
+* The exposed functions are not explicit in their relationships; they are controlled through the examples. The author's intent is lost.
+
+== Algebraic Specifications
+
+These specifications take an equational approach, allowing the specifier to define comparison operators based on basic value equality. They are expressed as rules with the premise describing execution and the conclusion defining equations using equality operations.
+
+=== Use case 1
+
+image::use-case-one-latex.png[]
+
+.Latex:
+[%collapsible]
+====
+\frac{m.put(i);\ j = m.get(i.type)}{i ≡ j_n}
+====
+
+This specification interacts with API methods and not underlying state.
+
+=== Use case 2
+
+image:use-case-two-latex.png[]
+
+.Latex:
+[%collapsible]
+====
+\frac{
+  \begin{array}{l}
+    exp\ does\ not\ cause\ m.clear() \\
+    \\
+    m.\text{put}(i);\ exp;\ m.\text{get}(i.\text{type})
+  \end{array}
+}{
+  m(old) ≡ m(new)
+}
+====
+
+
+* This specification is explicit about what side effects should not happen.
+* Due to expressing identity quality at different points during execution, the old and the new store is represented.
+
+== When to use Algebraic Specifications
+
+While algebraic specifications are simpler and more elegant than their model-based counterparts, their adoption in object-oriented programming remains rare in the industry. Their use requires:
+
+* A mature engineering culture that prioritises time for writing formal specifications.
+* Either well specified systems or the ability to retroactively specify existing, potentially undocumented code.
+
+Fast paced environments prioritise delivery over formalism. However, advocates for formal specifications must be able to articulate the long term benefits such as improved maintainability and sustained development velocity to justify the investment.
+
+In practice, algebraic specifications are valuable for documentation and communication of intent. Attempts to use them for advanced tooling, such as code generation, often run into limitations when:
+
+* Functions are impure, relying on internal mutable state or side effects.
+* Equality semantics extend beyond identity or structural equivalence.
+
+The benefit of writing these specifications is expression of developer intent in a precise form, which is often lost as systems evolve and teams change.
