@@ -628,7 +628,7 @@ Here are the latter predicates:
 
 ```ts
 public static boolean thirdPredicate(boolean a, boolean _b, boolean c, boolean _d) {
-    return !a && c;
+    return !a && c && d;
 }
 
 public static boolean fourthPredicate(boolean a, boolean b, boolean c, boolean _d) {
