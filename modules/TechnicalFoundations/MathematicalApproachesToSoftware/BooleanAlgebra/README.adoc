@@ -96,7 +96,7 @@ const checkCondition = (x: boolean, y: boolean): boolean => {
 }
 ```
 
-This simplifies the logical flow, improves readability and reduces nesting in conditional logic. The explicit negates each operand aiding in maintenance and comprehension.
+This simplifies the logical flow, improves readability and reduces nesting in conditional logic.
 
 === Examples with three conditions
 
