@@ -304,7 +304,7 @@ Here's a Karnaugh Map of our Pinky Extended example, where:
 ====
 For example, `01` on the left hand side represents !`TenantConfiguration` and `someOldPredicate`
 
-*Of critical importance* is how the third and firth row and columns have been ordered; differing by 1 bit instead of sequential binary number ordering.
+*Of critical importance* is how the third and fourth row and columns have been ordered; differing by 1 bit instead of sequential binary number ordering.
 ====
 
 image::karnaugh-map.svg[Static, 750]
