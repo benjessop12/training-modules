@@ -7,6 +7,10 @@
   "types": "module",
   "repository": "https://github.com/benjessop12/training-modules/modules/TechnicalFoundations/MathematicalApproachesToSoftware/BooleanAlgebra/test-application",
   "license": "MIT",
+  "engines": {
+    "npm": ">=11.0.0 < 12.0.0",
+    "node": ">= 22.0.0 < 25.0.0"
+  },
   "scripts": {
     "test-case-one": "npx eslint src/inMemoryModelStore.ts",
     "test-case-two": "npx eslint src/convoluted.ts",
