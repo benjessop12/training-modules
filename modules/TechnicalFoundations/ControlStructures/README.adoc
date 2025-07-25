@@ -1,0 +1,8 @@
+= Control Structures
+
+== Prelude
+
+This module provides both:
+
+* An introduction to link:./ControlStructure/README.adoc[Control Structures].
+* 🧱 Beginning building your (Pending) Capstone Project, which is optional if reading along at home.
