@@ -1,0 +1,322 @@
+= The Role of Control Structures in Programming
+
+Algorithms are finite sequences of instructions used to perform a computation. Control structures, such as loops and conditionals, are used to direct the flow of programs. They are necessary for abstractions that are tricky to model with objects or functions where there is often a performance overhead in doing so.
+
+== Types of Control Structures
+
+[%header,cols="1,2,2,2"]
+|===
+|Type
+|Description
+|TypeScript Example
+|Notes
+
+|*Sequential*
+a|
+A sequential control structure is composed of a defined number of actions that are placed in specific order and executed one after another. Functions are executed in a clear sequence as they are written.
+a|
+```ts
+const pipe = (...fns: Array<(x: number) => number>) => (value: number): number =>
+  fns.reduce((acc, fn) => fn(acc), value)
+
+pipe(add, multiply, subtract)
+```
+a|
+This example satisfies the requirements of being sequential as:
+
+* The operations are executed in order, left to right
+* There is no branching, looping or asynchronous behaviour
+* Each function takes the result of the previous one, mimicking a *step-by-step execution*
+
+|*Conditional*
+a|
+Conditional control structures define questions at certain points in an algorithm, where the answer is either `true` or `false` ( link:../../MathematicalApproachesToSoftware/BooleanAlgebra/README.adoc[Sound familiar?] ). Depending on the answer, different paths within the algorithm can be invoked.
+a|
+*Single alternative*
+
+```ts
+if (true) {
+  functionOne()
+}
+```
+
+*Double Alternative*
+
+```ts
+if (true) {
+  functionOne()
+} else {
+  functionTwo()
+}
+```
+
+*Multiple Alternatives*
+
+```ts
+switch (expression) {
+  case value1:
+
+    break
+  case value2:
+
+    break
+  default:
+
+}
+```
+|
+
+|*Iterative*
+a|
+Iterative control structures are used when solving issues that require repeatedly executing a set of actions. The number of times the sequence of actions needs to be repeated can be fixed or variable, depending on the data in the algorithm.
+a|
+*Repeat-While*
+
+```ts
+while (instructionStream.length > 0) {
+  vm.execute(instructionStream.pop())
+}
+```
+
+*Repeat-for*
+
+```ts
+for (initialization; condition; increment) {
+
+}
+```
+a|
+At a glance the `repeat-while` loop may look similar to recurison in Functional Programming, which appears as a loop-like structure:
+
+```ts
+const factorial = (number: number): number => {
+  if (number == 0) {
+    return 1
+  } else {
+    return number * factorial(number - 1)
+  }
+}
+```
+
+The key differences lie in how the control flow is managed:
+
+* In Functional Programming recursion replaces explicit looping constructs. Each call represents a step in computation and state is passed through function argument; there is no mutation. This is _declarative_ and expresses computation through function calls and return values without changing shared state.
+* The `repeat-while` loop mutates external state, such as the `instructionStream`, and relies on side effects and mutable control flow. Its control flow is _imperative_; driven by side effects like stack mutation.
+
+
+|*Monads*
+a|
+Not a traditional control structure, but an abstraction over flow control allowing declarative chaining of computations that can fail.
+
+Monads come in various forms, see https://learnyouahaskell.com/a-fistful-of-monads[A fistful of Monads].
+a|
+*prelude-ts* `Either`
+
+```ts
+import { Either } from 'prelude-ts'
+
+type Result<T, E = Error> = Either<E, T>
+
+const validateName = (user: User): Result<User> => {
+  return Either.try_(() => {
+    // Some validation that errors if false
+  }, {} as Error)
+}
+
+const validateAge = (user: User): Result<User> => {
+  return Either.try_(() => {
+    // Some validation that errors if false
+  }, {} as Error)
+}
+
+// Sequential composition
+const validateUser = (user: User): Result<User> =>
+  validateName(user)
+    .flatMap(validateAge)
+```
+a|
+`Either` represents a computation that can either succeed with a value (`Right(value`)) or fail with an error (`Left(error)`). It is used for sequencing right biased computation over a sum of two types.
+
+ * Each check depends on the previous one succeeding
+ * If a predicate fails, the error is returned immediately
+|===
+
+== In General
+
+Control structures are essential, foundational tools for directing program flow and should be used where appropriate. They shape how we think about problems. This document explores function across styles and what happens when we try to live without them.
+
+* *Procedural (Imperative)*: relies on control structures like `if` and `while` to manage exection flow.
+* *Object Oriented*: Control flow can be modeled via message passing between objects, however most languages offer procedural-style control structures due to their hybrid nature.
+* *Functional*: Emphasises expression based execution. Control flow is often handled through composition and recursion, though traditional structures exist.
+
+== Proving Usefulness with an Example
+
+An opportunist is looking to extort someone for money. They want to send the target a letter to express their intent. To avoid writing the letter in their handwriting, they take a letter written by an unsuspecting victim to reconstruct the message. They can only use one letter as their source, using only full words from said letter, as opposed to individual characters. They have many letters to use and checking each one manually to see if it can be used for constructing the desired message will take too long. To expedite the process they have parsed the letters into machine readable documents and decide to write a function that takes two parameters to detect if the desired message can be constructed from a source letter:
+
+* The first is the source letter as a string.
+* The second is the desired constructed output string.
+
+The return value is a boolean, returning `true` if the desired output can be constructed from the source letter.
+
+Our opportunist prides themselves on being a pure object oriented programmer and they write some golang as a first pass. They fall short by forcing the problem into object modelling to bypass control flow:
+
+```go
+package main
+
+import (
+  "fmt"
+  "strings"
+)
+
+type Word string
+
+type WordList struct {
+  words []Word
+}
+
+func NewWordList(text string) *WordList {
+  ws := strings.Fields(text)
+  wordObjs := make([]Word, len(ws))
+  for i, w := range ws {
+    wordObjs[i] = Word(w)
+  }
+  return &WordList{words: wordObjs}
+}
+
+type WordCounter struct {
+  wordList *WordList
+}
+
+func NewWordCounter(wl *WordList) *WordCounter {
+  return &WordCounter{wordList: wl}
+}
+
+func (wc *WordCounter) Count() *WordFrequencyMap {
+  return NewWordFrequencyMap(wc.wordList)
+}
+
+type WordFrequencyMap struct {
+  counts map[string]int
+}
+
+func NewWordFrequencyMap(wl *WordList) *WordFrequencyMap {
+  counts := map[string]int{}
+  addWord := func(w Word) {
+    word := string(w)
+    counts[word] = counts[word] + 1
+  }
+
+  // These loops pained the opportunist to write!
+  for _, word := range wl.words {
+    addWord(word)
+  }
+  return &WordFrequencyMap{counts: counts}
+}
+
+func (wfm *WordFrequencyMap) Contains(other *WordFrequencyMap) bool {
+  for word, count := range other.counts {
+    if wfm.counts[word] < count {
+      return false
+    }
+  }
+
+  return true
+}
+
+func main() {
+  source := "I hope this letter finds you well, Grandson. You will be receiving your inheritance early as a large lump sum. This is due to me falling unwell. I request you use it for good causes. If I have one regret it is that you will not miss me when I pass."
+  target := "I hope this letter finds you unwell. I request a large lump sum. If not you will regret it"
+
+  sourceWords := NewWordList(strings.ToLower(source))
+  targetWords := NewWordList(strings.ToLower(target))
+
+  sourceMap := NewWordCounter(sourceWords).Count()
+  targetMap := NewWordCounter(targetWords).Count()
+
+  ok := sourceMap.Contains(targetMap)
+  fmt.Println("Can build from source letter?", ok)
+}
+```
+
+Whilst the code satisfies the ask, the opportunist looks at their code in horror and is ashamed to use it. It both:
+
+* Is attempting to use *only* objects and method calls _where possible_ which results in difficult to maintain code.
+* Requires the use of *control structures* to iterate over words.
+
+The opportunist toiled for hours to remove the control structures trying to model approaches in a pure OOP version:
+
+```go
+type WordBank struct {
+  hasI      bool
+  hasHope   bool
+  hasThis   bool
+  hasLetter bool
+  hasFinds  bool
+  hasYou    bool
+  hasUnwell bool
+}
+
+func (wb *WordBank) CanBuild() bool {
+  return wb.hasI &&
+    wb.hasHope &&
+    wb.hasThis &&
+    wb.hasLetter &&
+    wb.hasFinds &&
+    wb.hasYou &&
+    wb.hasUnwell
+}
+```
+
+Which required manually building structures for each message wishing to be sent, which defeats the purpose of automation.
+
+After accepting the code would benefit from the use of control structures, the opportunist decided to write:
+
+```go
+package main
+
+import (
+  "fmt"
+  "strings"
+)
+
+func canBuildMessage(source string, target string) bool {
+  sourceWords := strings.Fields(strings.ToLower(source))
+  targetWords := strings.Fields(strings.ToLower(target))
+
+  wordCount := make(map[string]int)
+  for _, word := range sourceWords {
+    wordCount[word]++
+  }
+
+  for _, word := range targetWords {
+    if wordCount[word] == 0 {
+      return false
+    }
+    wordCount[word]--
+  }
+
+  return true
+}
+
+func main() {
+  source := "I hope this letter finds you well, Grandson. You will be receiving your inheritance early as a large lump sum. This is due to me falling unwell. I request you use it for good causes. If I have one regret it is that you will not miss me when I pass."
+  target := "I hope this letter finds you unwell. I request a large lump sum. If not you will regret it"
+
+  ok := canBuildMessage(source, target)
+  fmt.Println("Can build from source letter?", ok)
+}
+```
+
+The opportunist settles on this approach as it:
+
+* Is clear in its intent. The control structures provide a familiar and intuitive structure that developers are attuned with.
+* Is clearly expressing a pattern that matches its structure.
+* Cleanly solves what would be painful to model with only object types and static method calls.
+* Results in better performance.
+
+[NOTE]
+====
+This example showcases the power of control structures. Modelling abstractions with objects or functions *is not* mutually exclusive from control structures. Control structures are crucial for expressing logic clearly. Finding balance is key. Control structures are how your code tells a story.
+
+📝 *Editors note* This example highlights an unrelated-to-control-structures point that programmers can find themselves caught up in. Programming is not about being doctrinaire with paradigms; it is about expressing intent clearly and efficiently. Control structures are *foundational* and the 'opportunist' demonstrates the pain of taking the ideas of a 'tool' (being Object oriented programming) beyond its intent.
+====

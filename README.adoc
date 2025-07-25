@@ -6,6 +6,8 @@
 
 :fn-language-specific-pitfall: footnote:language-specific-pitfall[Evergreen skills should be the focus of engineers looking to upskill. Language/tooling specific skills are included as, unfortunately, many interviewers focus on them during technical conversations.]
 
+:fn-capstone-project: footnote:capstone-project[A capstone project allows you to demonstrate your accumulated knowledge and skills by tackling a real-world problem. As you continue to progress throughout the training modules you will constantly be applying your learnings to a practical endeavour.]
+
 This repository is a commitment from me to a group of Software Engineers at the company I work for; to run weekly{fn-time-commitment} training sessions with an end goal of growing their careers.
 
 This results in the outlined pathway being curated specifically to those Engineers and their career desires. This is open-sourced with the hopes it may provide useful to other engineers.
@@ -21,13 +23,16 @@ Each week{fn-time-commitment} a new module will be added for the next subject in
 
 Each module will have some form of interactive element for the audience, however expect the structure of modules to change.
 
+After the first session, each module will have an accompanying 🧱 *capstone project{fn-capstone-project}* section which is optional for those reading along at home. These additions were useful for the engineers partaking in the weekly sessions as it enabled applied learning.
+
 A prerequisite for each module is to install `node` and `npm`.
 ====
 
-NOTE: The latter stages are yet to be planned out.
+NOTE: The latter stages are yet to be planned out. Links to modules are found beneath the pathway chart.
 
 image::high-level-pathway.png[]
 
 Chronological List of available modules:
 
-* link:./modules/TechnicalFoundations/MathematicalApproachesToSoftware/README.adoc[Week 1 Mathematical Approaches to Software]
+* link:./modules/TechnicalFoundations/MathematicalApproachesToSoftware/README.adoc[Session 1: Mathematical Approaches to Software]
+* link:./modules/TechnicalFoundations/ControlStructures/README.adoc[Session 2: Control Structures]
