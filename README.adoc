@@ -4,31 +4,45 @@
 
 :fn-time-commitment: footnote:time-commitment[Varies based on my availability.]
 
+:fn-llm-era: footnote:llm-era[Subjects do not cover boilerplate code generation as that has been automated.]
+
 :fn-language-specific-pitfall: footnote:language-specific-pitfall[Evergreen skills should be the focus of engineers looking to upskill. Language/tooling specific skills are included as, unfortunately, many interviewers focus on them during technical conversations.]
+
+:fn-mobile-navigation: footnote:mobile-navigation[AsciiDoc is used as it promotes more maintainable documentation. There is a known bug where subdirectory AsciiDoc files do not render as HTML in mobile views.]
 
 :fn-capstone-project: footnote:capstone-project[A capstone project allows you to demonstrate your accumulated knowledge and skills by tackling a real-world problem. As you continue to progress throughout the training modules you will constantly be applying your learnings to a practical endeavour.]
 
-This repository is a commitment from me to a group of Software Engineers at the company I work for; to run weekly{fn-time-commitment} training sessions with an end goal of growing their careers.
+This repository is a commitment from me to a group of Software Engineers at the company I work for; to run weekly{fn-time-commitment} training sessions with an end goal of growing their careers. This is open-sourced with the hopes it may provide useful to other engineers. Subjects remain relevant in the LLM era{fn-llm-era}.
 
-This results in the outlined pathway being curated specifically to those Engineers and their career desires. This is open-sourced with the hopes it may provide useful to other engineers.
+Initial modules focus on foundational skills through language specific verbatim, which is an acceptable pitfall{fn-language-specific-pitfall} considering the Engineers these modules were originally delivered to wish to learn either:
 
-The modules will be iteratively added as the sessions commence over time.
+1. TypeScript
+2. Golang
 
-Admittedly, the initial modules will focus on Technical Foundational skills through language specific verbatim, which is an acceptable pitfall{fn-language-specific-pitfall} considering the Engineers these modules were originally delivered to wish to learn TypeScript. Future sessions will progress to broader subjects such as best practices, leadership, collaboration and thinking critically about solutioning valuable business problems.
+Future sessions will progress to broader subjects such as best practices, leadership, collaboration and thinking critically about solutioning valuable business problems.
 
-*This is a work in progress. Information will be missing.*
+NOTE: *This is a work in progress. Information will be missing. Mobile navigation is not supported{fn-mobile-navigation}.*
 
-====
+---
+
+== Pedagogy
+
 Each week{fn-time-commitment} a new module will be added for the next subject in the pathway. *The pathway is only a rough estimate and may change.*
 
-Each module will have some form of interactive element for the audience, however expect the structure of modules to change.
+Most modules will have some form of interactive element for the audience, however expect the structure of modules to change.
 
-After the first session, each module will have an accompanying 🧱 *capstone project{fn-capstone-project}* section which is optional for those reading along at home. These additions were useful for the engineers partaking in the weekly sessions as it enabled applied learning.
+Starting from the second session, each module will have an accompanying 🧱 *capstone project{fn-capstone-project}* section which is optional for those following along independently. These projects enable applied learning. The capstone project builds incrementally with each session, so if you wish to work on it begin from session two and continue in order.
 
-A prerequisite for each module is to install `node` and `npm`.
-====
+A prerequisite for each module is to install one or both:
 
-NOTE: The latter stages are yet to be planned out. Links to modules are found beneath the pathway chart.
+* `node` and `npm`
+* `go`
+
+---
+
+== Pathway
+
+NOTE: Links to modules are found beneath the pathway chart.
 
 image::high-level-pathway.png[]
 
