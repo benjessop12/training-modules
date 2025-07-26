@@ -25,7 +25,7 @@ NOTE: *This is a work in progress. Information will be missing. Mobile navigatio
 
 ---
 
-== Pedagogy
+== Approach
 
 Each week{fn-time-commitment} a new module will be added for the next subject in the pathway. *The pathway is only a rough estimate and may change.*
 
