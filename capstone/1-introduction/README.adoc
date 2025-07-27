@@ -1,0 +1,112 @@
+= 🧱 Capstone Project Session One: Introduction
+
+:imagesdir: ./images
+
+[NOTE]
+====
+Welcome to the capstone project. You will complete each primary pathway module before moving to the associated capstone session.
+
+Each session will:
+
+1. Set the scene of a mock technical environment.
+2. Establishes a task or objective, similar to what you may see in a professional environment.
+3. Provide guidance on a possible approach.
+
+The project solution will be provided in the `solution` and additions, after the first session, are explained in the next session. It is encouraged that you keep your own workings and iterate them over each session.
+
+🧪 This is an artefact from the in-person sessions that were run with the in-person group.
+
+*Each session has been designed to take no more than one hour. Material is significantly reduced to accomodate this constraint.*
+====
+
+TIP: ↩️ Complete the link:../../modules/TechnicalFoundations/ControlStructures/ControlStructure/README.adoc[Control Structure module] before starting this session.
+
+---
+
+== Setting the Scene
+
+You have joined a small organisation as an _software engineer_. The company is building a platform to provide traders of securities (stocks) near-real time alerts of events that _may_ impact the price of a security they are subscribed to. Here is the team:
+
+image::the-team.png[]
+
+You've had a quick introduction with the CEO who has thrown you into the deep end asking you to complete a greenfield software project which has _some_ documentation. You will interact with other members of the team along the journey, however you mostly work in isolation.
+
+After meeting the Product Manager, it has been explained that a _Solution Architect_, who has now left, paired with them to write some initial documentation that you might find useful.
+
+Over the duration of the capstone sessions, you have been tasked with building a single service that exists within a broader architecture. The high level responsibility of the service you will be writing is to 'Validate' and 'Rate' the alerts being submitted to end users.
+
+* The overall solution is partially described in the link:./solution/architecture-docs/002-Domain/solution-architecture.adoc[Solution Architecture] file. The service you will be building is highlighted in blue and exists within the Signal Processing Layer.
+* A link:./solution/architecture-docs/002-Domain/external-data-domain-glossary.adoc[Domain Glossary] is available and may be expanded over time. It details the types of external data being profiled.
+
+== Session One Ask
+
+The core training modules we have gone through so far have focused on thinking in systems, beyond code. Being new to the capstone service domain (Rating financial events), we seek to clarify complexity and will generate specifications before writing code. You must:
+
+* Read the above documentation to become familiar with the ask.
+* Finish the below *incomplete* _flow of control_ diagram for the first _functional_ component in the service; *augmenting to a security*. This builds abstraction skills leading to writing maintainable, intentional software.
+** Continue building the output as a https://plantuml.com/activity-diagram-beta[Plantuml activity diagram] in the online https://www.plantuml.com/plantuml/uml/SyfFKj2rKt3CoKnELR1Io4ZDoSa700003[plantuml editor].
+** Save the PNG and raw PlantUML output to `solution/architecture-docs/004-SystemsViewpoint/augmenting-to-a-security.adoc`
+* The control flow *must* be compliant against the link:./solution/architecture-docs/007-Requirements/augmenting-to-a-security.adoc[Requirements Traceability Matrix].
+
+== Guidance
+
+1. The Requirements Traceability Matrix and the link:../../modules/TechnicalFoundations/ControlStructures/ControlStructure/README.adoc[Control Structure module] are the only required training-module reference points.
+2. Existing components in the _flow of control_ diagram may be wrong and may require updating. Check branching logic; not all paths will be true against the RTM.
+3. Document difficulties you had with the ask. As part of becoming a more seasoned engineer you are expected to refine requirements to ensure they are technically feasible.
+
+== Steps
+
+.Expand and copy the following PlantUML:
+[%collapsible]
+====
+```
+@startuml
+
+start
+
+if (eventTriggerError?) then (yes)
+  :reportError;
+  stop
+endif
+
+repeat :start;
+  if (eventInvalidFormat?) then (yes)
+    :Alert "Error";
+    stop
+  endif
+  -> OK;
+
+  if (securityInvalid?) then
+    :Alert "Error";
+    stop
+  endif
+  -> OK;
+
+backward:dynamicLoad;
+repeat while(securityLoadedIntoSystem?) is (no)
+-> yes;
+
+if (eventRatable?) then (no)
+  :Increment Counter;
+  stop
+endif
+- passForRating;
+stop
+
+
+@enduml
+```
+====
+
+Into the online https://www.plantuml.com/plantuml/uml/SyfFKj2rKt3CoKnELR1Io4ZDoSa700003[plantuml editor]. Update the flow of control to be compliant with the Requirements Traceability Matrix.
+
+* Generate a compliant control flow diagram.
+* Save the diagram as a PDF, upload to `capstone/1-introduction/images/control-flow-augmenting-to-a-security`
+* Save the raw PlantUML output to `capstone/1-introduction/solution/architecture-docs/004-SystemsViewpoint/augmenting-to-a-security.adoc`
+
+[NOTE]
+====
+🧪 For those attending the weekly sessions, we will review generated outputs in the meeting.
+
+For those coding asynchronously cross compare your outputs with next weeks solution.
+====

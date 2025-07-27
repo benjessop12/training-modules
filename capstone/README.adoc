@@ -1,0 +1,7 @@
+= 🧱 Capstone Project
+
+:fn-subject-augmentation: footnote:subject-augmentation[Some subjects, such as control structures, make little sense when translating to a capstone project. In these instances introductions or interludes to progress the capstone project are taken.]
+
+This directory contains iterative versions of a single functional project aimed to deepen the audiences understanding of various subjects{fn-subject-augmentation}.
+
+You are *expected* follow each module outlined in the pathway in sequence before engaging with the capstone project.
