@@ -1,0 +1,37 @@
+= Trading Platform Solution Architecture
+
+:imagesdir: ../../../images
+
+[options="header"]
+|===
+|
+*Editor's Notes*
+a|
+*THIS FILE IS INCOMPLETE. WE WILL COMPLETE IT OVER TIME IN SUBSEQUENT SESSIONS*
+
+_Designed for various levels of introspection from external views where discussing internal implementation details creates unncessary noise to in depth views of system internals._
+
+_Guidance: this page is structured to tell the following story_
+
+* What does it do?
+* Who does it impact?
+* How does it do it?
+* How is it run?
+
+When describing an architecture the guidelines of the ISO/EIC/IEE 42010 systems and software engineering architecture description standard are followed. According to this standard an architecture description must:
+
+* Contain multiple standard architectural views
+* Maintain traceability between design decisions and architectural requirements
+|===
+
+A system's architecture is defined as the infrastructure within which application components satisfy functional requirements can specified, deployed and executed.
+
+* Functional requirements are the expected functions of the system and its components.
+* Non-functional requirements are measures through which the quality of the system can be measured.
+
+
+==== Behavioural View
+
+The behavioural view shows how components and layers interact with one another. This is useful when creating scenarios for testing architecture designs and for understanding the system end-to-end.
+
+image::solution-architecture-behavioural-view.png[]
