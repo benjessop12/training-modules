@@ -50,3 +50,7 @@ Chronological List of available modules:
 
 * link:./modules/TechnicalFoundations/MathematicalApproachesToSoftware/README.adoc[Session 1: Mathematical Approaches to Software]
 * link:./modules/TechnicalFoundations/ControlStructures/README.adoc[Session 2: Control Structures]
+
+Bonus readings:
+
+* link:./modules/Bonus/CommonPractices/application-structure.adoc[Bonus 1: Application Structure]

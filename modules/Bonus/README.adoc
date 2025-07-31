@@ -1,0 +1,3 @@
+= Bonus
+
+The documents in this directory are small additions that provided supporting context for the in-person workshops.
