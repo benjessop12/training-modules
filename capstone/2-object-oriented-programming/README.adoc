@@ -1,0 +1,30 @@
+= 🧱 Capstone Project Session Two: Object Oriented Programming
+
+:imagesdir: ./images
+
+NOTE: *I've not published the updates to this document yet. Come back later!*
+
+[NOTE]
+====
+Changes since the last session:
+
+* The introduction of a boiler plate typescript project in `systems/signals/rating-service`.
+
+
+====
+
+TIP: ↩️ Complete the link:../../modules/TechnicalFoundations/ObjectOrientedDesignPrinciples/README.adoc[Object Oriented Design Principles module] before starting this session.
+
+---
+
+== Setting the Scene
+
+
+== Session Two Ask
+
+
+== Guidance
+
+
+== Steps
+
