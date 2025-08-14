@@ -1,0 +1,470 @@
+= Object Oriented Design Principles
+
+Object Oriented Programming is based on the concepts of 'objects' which contain data and code. Classes are the templates for 'objects' where instances share common properties and behaviours. It is a paradigm that has no solid mathematical principles which leaves it open to interpretation.
+
+Here is a short list of common princples to follow that allow you to write clean OOP code:
+
+NOTE: This is a live document. I plan to add to this list over time.
+
+== 1. Prefer composition over inheritance.
+
+Engineers are often taught OOP is all about implementation inheritance. Inheritance is when a sub/derived class is created based on an existing super/base class. The subclass inherits state and methods from the superclass, allowing it to reuse and extend the functionality of the superclass.
+
+Inheritance shares implementation details across the classes, often creating unnecessary dependencies. When inheriting classes, changes in the superclass can silently break subclasses. The result is tight coupling slowing down the development process and increases the risk of regression.
+
+Here is an example where two teams manage separate domains. Team1 defined the superclass and team2 was formed and discovered the MarketMessage class and chose to extend it in their trades domain:
+
+```ts
+// In team1/src/core/domain/markets
+
+export abstract class MarketMessage {
+  constructor(
+    public readonly serde: SerDeUnionType,
+    public readonly destination: MarketDestination
+  ) {}
+
+  abstract serialise(
+    envelope: MarketMessageEnvelope
+  ): Option<SerialisedMarketMessage>
+
+  async emit(serialisedMessage: SerialisedMarketMessage): Promise<Result<MarketResult>> {
+    return this.destination.send(serialisedMessage)
+  }
+}
+
+export class EquityTradeMessage extends MarketMessage {
+  serialise(
+    envelope: MarketMessageEnvelope
+  ): Option<SerialisedMarketMessage> {
+    if (this.serde === SerDeTypes.JSON) {
+      return Option.of({ raw: JSON.stringify(envelope.payload) })
+    }
+
+    return Option.none()
+  }
+
+  async emit(serialisedMessage: SerialisedMarketMessage): Promise<Result<MarketResult>> {
+    exportEquityEmissionMetric(1)
+    return super.emit(serialisedMessage)
+  }
+}
+
+// In team2/src/core/domain/trades
+
+export class TradeReport extends MarketMessage {
+  constructor(
+    serde: SerDeUnionType,
+    destination: MarketDestination,
+    private readonly reportData: Record<string, unknown>
+  ) {
+    super(serde, destination)
+  }
+
+  serialise(): Option<SerialisedMarketMessage> {
+    return Option.of({ raw: BinaryStringifier.stringify(this.reportData) })
+  }
+
+  async emit(serialisedMessage: SerialisedMarketMessage): Promise<Result<MarketResult>> {
+    emitTradeReportEmissionEventToEventBridge(serialisedMessage)
+    return super.emit(serialisedMessage)
+  }
+}
+```
+
+This shows the power of re-use, however leaves the application in a fragile state as the inheritance of the super class across boundaries means team1 maintaining the market domain has to ensure the sub class in the trade domain, maintained by team2, does not break when updating their super class. This dependency muddies the boundaries in the code and increases the coordination cost to make changes.
+
+[NOTE]
+====
+It is generally safe to use inheritance within a well defined context where subclass and superclass implementations are controlled by the same programmers. It is also safe to extend classes explicitly designed and documented for extension.
+
+```ts
+//
+// Maintainer note:
+// This class will not change it's shape.
+// In the rare instance we need to make changes
+//   we will introduce `PaymentProviderV2`.
+//
+export abstract class PaymentProvider {
+  abstract charge(amount: number, currency: string): Promise<Result>
+}
+
+// Third party code
+export class StripeProvider extends PaymentProvider {
+  charge(amount: number, currency: string) { ... }
+}
+```
+
+This is considered safe as the maintainers of the superclass are publishing an API with stability guarantees.
+====
+
+In our original example, inheritance requires a subclass depending on implementation details of its superclass for its function. The superclasses implementation may change over releases which can break subclasses without the subclass having changed.
+
+Golang has taken a stance on how to solve this problem that can be distilled to other languages; prefer composition over inheritance as it is almost always the better choice. It enables the developer to follow the desires of *abstraction* where only the essential attributes and behaviours are exposed to the client. If in doubt, prefer composition as it is rare that classes are designed for extension or do not cross bounded contexts. Although Go enforces composition through interfaces, the underlying principle applies in TypeScript: dependencies should be on behaviour not internal implementation.
+
+Here is a re-work of the previous inheritance example, with a compositional approach:
+
+NOTE: Composition treats the originally inherited class as a component of the new class, assigning it to a private field that references an instance of the existing class. With this approach, the original subclass is only interacting with the API of the component as opposed to hooking into and inheriting implementation details.
+
+```ts
+export class Emitter {
+  constructor(
+    private readonly destination: MarketDestination
+  ) {}
+
+  async emit(serialisedMessage: SerialisedMarketMessage): Promise<Result<MarketResult>> {
+    return this.destination.send(serialisedMessage)
+  }
+}
+
+export class JSONSerialiser {
+  serialise(
+    envelope: MarketMessageEnvelope
+  ): Option<SerialisedMarketMessage> {
+    return Option.of({ raw: JSON.stringify(envelope.payload) })
+  }
+}
+
+export class EquityTradeMessage {
+  constructor(
+    private readonly emitter: Emitter,
+    private readonly serialiser: JSONSerialiser
+  ) {}
+
+  async emit(envelope: MarketMessageEnvelope): Promise<Result<MarketResult>> {
+    const serialisedMessage = this.serialiser.serialise(envelope)
+
+    if (serialisedMessage.isSome()) {
+      exportEquityEmissionMetric(1)
+      return this.emitter.emit(serialisedMessage.get())
+    }
+
+    return Result.fail("Serialisation failed")
+  }
+}
+
+// In src/core/domain/trades
+
+export class TradeReport {
+  constructor(
+    private readonly emitter: Emitter,
+    private readonly reportData: Record<string, unknown>,
+    private readonly stringifier: SupportedStringifierTypes
+  ) {}
+
+  async emit(): Promise<Result<MarketResult>> {
+    const message = this.stringifier.stringify(this.reportData)
+    emitTradeReportEmissionEventToEventBridge(message)
+    return this.emitter.emit({ raw: message })
+  }
+}
+```
+
+* *Inheritance* shares implementation details creating hidden dependencies. Changes to the superclass risk breaking subclasses.
+* *Composition* depends on stable, explicit contracts. Components can be replaced or extended without risking unrelated parts of the codebase.
+
+TIP: Due to the nature of coupling and behaviour enforcement, overly rigid inheritance hierarchies also makes it impossible to reuse behaviours in flexible ways. Each layer of inheritance enforces a certain behaviour to each layer of subclass that likely does not reflect real-world domains. Composition allows the user to define the behaviour of their object in isolation away from the component behaviour, leading to more accurate DDD representations.
+
+== 2. Do not violate encapsulation.
+
+Encapsulation is the practice of representing state and associated behaviour within a class, restricting direct access to the state and exposing an interface for message passing (method calls in `TypeScript`). State or data of a class should be hidden from other classes. You will often see heavy use of getters and setters, sometimes violating encapsulation by exposing internal implementation details directly:
+
+```ts
+class MyLedger {
+  private _balance: number
+
+  constructor(initialBalance: number) {
+    this._balance = initialBalance
+  }
+
+  get balance(): number {
+    return this._balance
+  }
+
+  set balance(value: number) {
+    this._balance = value
+  }
+}
+```
+
+The above example exposes and mutates internal state without invariants, validation or constraints. Internal representation change will break clients due to depending on and manipulating raw data. Instead expose meaningful operations:
+
+```ts
+class MyLedger {
+  private balance: number
+
+  constructor(initialBalance: number) {
+    if (initialBalance < 0) throw new Error("Initial balance cannot be negative")
+    this.balance = initialBalance
+  }
+
+  debit(amount: number): void {
+    if (amount <= 0) throw new Error("Debit must be a positive")
+    this.balance += amount
+  }
+
+  credit(amount: number): void {
+    if (amount <= 0 || amount > this.balance)
+      throw new Error("Invalid credit amount")
+    this.balance -= amount
+  }
+
+  getBalance(): number {
+    return this.balance
+  }
+}
+```
+
+By hiding raw state and exposing only meaningful operations invariants are preserved, the class is protected against invalid states and the code reflects the domain rather than its data structures.
+
+== 3. Prefer polymorphic types over complex expressions.
+
+Using boolean expressions as an example:
+
+```ts
+class DynamicEventEmitter {
+  private format: string
+
+  constructor(format: string) {
+    this.format = format
+  }
+
+  async emit(message: MessageType): Promise<void> {
+    if (this.format === "AMQP") {
+      // Omitted: large block of AMQP code
+    } if (this.format === "MQTT") {
+      client = mqtt.connect('mqtt://localhost:1883')
+      client.on('connect', () => {
+        client.publish('my/topic', message, (err) => {
+          if (err) console.error('Error publishing message:', err)
+          client.end()
+        })
+      })
+    } else if (this.state === "HTTP" || this.state === "REST") {
+      const cloudEvent = new CloudEvent({
+        type: 'com.example.bad.code',
+        source: '/my/application',
+        data: message
+      })
+      const emit = emitterFor(httpTransport('https://somewhere.com/endpoint'))
+      await emit(cloudEvent)
+    } else {
+      const serializedMessage = GeneratedDataStructure.encode(message).finish()
+      await HTTPClient.post(serializedMessage)
+    }
+  }
+}
+```
+
+This is a trivial example that will have issues with the TypeScript Language Service, however demonstrates real issues:
+
+* Multiple `if/else` checks tied to string values which are easy to mistype and hard to refactor.
+* Nested boolean logic that grows with every new type, making maintenance painful.
+* All logic is lumped into one large method.
+
+Instead use *Polymorphism* to remove branching:
+
+NOTE: Polymorphism is the ability for different objects to be treated as instances of a common superclass.
+
+```ts
+abstract class EventEmitter {
+  abstract emit(message: MessageType): Promise<void>
+}
+
+class AMQPEmitter extends EventEmitter {
+  async emit(message: MessageType): Promise<void> {
+    // Omitted: AMQP send logic
+  }
+}
+
+class MQTTEmitter extends EventEmitter {
+  async emit(message: MessageType): Promise<void> {
+    client = mqtt.connect('mqtt://localhost:1883')
+    client.on('connect', () => {
+      client.publish('my/topic', message, (err) => {
+        if (err) console.error('Error publishing message:', err)
+        client.end()
+      })
+    })
+  }
+}
+
+class HTTPEmitter extends EventEmitter {
+  async emit(message: MessageType): Promise<void> {
+    const cloudEvent = new CloudEvent({
+      type: 'com.example.bad.code',
+      source: '/my/application',
+      data: message
+    })
+    const emit = emitterFor(httpTransport('https://somewhere.com/endpoint'))
+    await emit(cloudEvent)
+  }
+}
+
+// is a ProtoBuf emitter
+class DefaultEmitter extends EventEmitter {
+  async emit(message: MessageType): Promise<void> {
+    const serializedMessage = GeneratedDataStructure.encode(message).finish()
+    await HTTPClient.post(serializedMessage)
+  }
+}
+```
+
+The behaviour is self contained and explicit and negates the risk of magic strings causing incorrect logic. Adding future protocols requires adding a new class rather than editing a giant conditional. Each emitter is easier to test independently.
+
+== 4. Keep Dependency Injection simple
+
+Dependency injection is a technique used in object-oriented programming that reduces the hardcoded dependencies between objects. A dependency is an object that relies on another object to perform its function.
+
+Hardcoding dependencies tightly couples your class to specific implementations:
+
+```ts
+class A {
+  call(): void {
+    const dependency = new B
+    dependency.call()
+  }
+}
+```
+
+This is rigid as `A` always uses `B`. If you want `A` to use `C` you must edit `A` 's source code. Instead, inject the dependency from the outside:
+
+```ts
+interface Dependency {
+  call(): void
+}
+
+class A{
+  constructor(private dependency: Dependency) {}
+
+  call(): void {
+    this.dependency.call()
+  }
+}
+```
+
+Now `A` can work with any object that implements `Dependency`:
+
+```ts
+class B implements Dependency {
+  call(): void {
+    console.log("B")
+  }
+}
+
+class C implements Dependency {
+  call(): void {
+    console.log("C")
+  }
+}
+
+const a1 = new A(new B())
+a1.call() // B
+
+const a2 = new A(new C())
+a2.call() // C
+```
+
+Code written with dependency injection is more maintainable, testable and flexible.
+
+For example, in unit tests you can inject a mock dependency instead of a real one:
+
+```ts
+class MockDependency implements Dependency {
+  call(): void {
+    console.log("Mock")
+  }
+}
+
+const a = new A(new MockDependency())
+a.call() // Mock
+```
+
+The *D* in *SOLID* stands for Dependency Inversion Principle
+
+> High-level modules should not depend on low-level modules. Both should depend on abstractions.
+
+* Do not hardcode dependencies.
+* Depend on interfaces or abstract types.
+* Changes in conrete implementations should not ripple through higher-level code.
+
+Inversion of Control is a broader idea:
+
+> A class should be configured by something else from the outside rather than configuring its own dependencies internally.
+
+Dependency injection is a specific way to achieve IoC.
+
+There are many ways to implement dependency injection. Many online resources will guide you to dependency injection containers or frameworks that:
+
+* *Register*: Map service names or types to implementations.
+* *Resolve*: Recursively construct dependencies when needed.
+
+Example (pseudo-code):
+
+```ts
+const container = new DIContainer()
+container.register("logger", Logger)
+container.register("userService", UserService, ["logger"])
+
+const userService = container.resolve("userService")
+```
+
+This hides complexity. The 'magic' resolution may make it harder to trace where dependencies came from.
+
+Modern languages actively encourage developers to avoid these due to their complexity. For example, Golang prefers propagating dependency graphs in the `main` function:
+
+```go
+function main() {
+  const logger = new Logger()
+  const userService = new UserService(logger)
+  const app = new App(userService)
+  app.start()
+}
+```
+
+This results in a clear dependency graph, easy to reason the mental map with no hidden writing.
+
+== 5. Keep objects immutable.
+
+When being introduced to OOP, objects are inherently mutable. You learn about getters, setters and modifying properties after creation giving the impression that mutability is a requirement in object-oriented programming.
+
+In reality, there is no such requirement. Many languages, such as Scala, actively discourage mutability. Immutable objects tend to be easier to reason about due to their state never changing after creation.
+
+An immutable object is one where the state cannot be modified after it is created. Once constructed, the data remains consistent. The benefits:
+
+* *Thread safety*: Multiple threads can safely share the object without locks or synchronisation.
+* *Guaranteed validity*: Once the object's state is validated it cannot be corrupted by later changes.
+* *Stronger encapsulation*: External code cannot sneak in changes to object's internal data.
+
+Here is an example of a mutable object:
+
+```ts
+class MutableUser {
+  constructor(public name: string, public age: number) {}
+
+  updateName(name: string) {
+    this.name = name
+  }
+}
+```
+
+Again, but with immutability:
+
+```ts
+class ImmutableUser {
+  public readonly name: string
+  public readonly age: number
+
+  constructor(name: string, age: number) {
+    this.name = name
+    this.age = age
+  }
+
+  withName(name): ImmutableUser {
+    return new ImmutableUser(name, this.age)
+  }
+}
+```
+
+The immutable object returns a new instance rather than modifying the existing one.
+
+In many cases, designing immutable objects leads to safer, more predictable code especially in concurrent and large scale systems.
