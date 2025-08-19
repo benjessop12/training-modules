@@ -50,57 +50,56 @@ The integration folder containing a `rating_result_integration_test.go` file wou
 
 NOTE: This is *not* doctrine, they are just opinionated examples. Other hexagonal structures MAY differ.
 
-Clean *go* services organise code with the following approach:
+Clean *TypeScript* services organise code with the following approach:
 
-* Application domain types such as `Security` and `RatingResult` (structs) go in the `internal/core/domain` directory. These are the collection of types which define what the application does without defining how it does it.
-* Interfaces for managing the above types go in `internal/core/ports`. These are the interfaces adapters must follow.
-* Everything is tied together in the `cmd` subpackages, which represents working software. The implementation subpackages are loosely coupled so they need to be wired together by another package to make working software. That's the job of the `cmd` subpackages which produce the final binary.
-* Smaller packages don't fall into the organisation listed above. For example, a `http/html` package groups together HTML templates used by the `http` package.
+* Application domain types such as `Security` and `RatingResult` (structs) go in the `src/core/domain` directory. These are the collection of types which define what the application does without defining how it does it.
+* Interfaces for managing the above types go in `src/core/ports`. These are the interfaces adapters must follow.
+* Everything is tied together in the `src/functions` subpackages, which represents working software. The implementation subpackages are loosely coupled so they need to be wired together by another package to make working software.
+* Smaller packages don't fall into the organisation listed above. For example, a `src/http/html` package groups together HTML templates used by the `http` package.
+* `src/core/services` are pure functions or classes that coordinate domain and port interactions but do not depend on adapters.
 
 ```code
 └── Root
-   ├── cmd
-   │   └── main.go
    ├── .env
    ├── images
-   ├── go.mod
-   ├── go.sum
-   └── internal
+   ├── package.json
+   ├── package-lock.json
+   ├── config
+   |   └── nginx.conf
+   |
+   └── tests
+       │   ├── integration
+       │   └── unit
+   |
+   └── src
        ├── adapters
        │   ├── cache
-       │   │   └── memory.go
+       │   │   └── Memory.ts
        │   │
        │   ├── handler
-       │   │   ├── error.go
-       │   │   ├── http.go
+       │   │   ├── Error.ts
+       │   │   ├── Http.ts
        │   │   └── ... cont
        │   │
        │   ├── repository
-       │   │   ├── apiCfg.go
-       │   │   ├── db.go
+       │   │   ├── ApiConfig.ts
+       │   │   ├── Db.ts
        │   │   └── ... cont
-       |   |
-       │   └── tests
-       │       ├── integration
-       │       └── unit
-       │
-       ├── config
-       │    ├── config.go
-       │    └── nginx.conf
        │
        ├── core
        │   ├── domain
-       │   │   └── Security.go
-       │   │   └── RatingResult.go
+       │   │   └── Security.ts
+       │   │   └── RatingResult.ts
        │   |
        │   ├── ports
-       │   │   └── SecurityRepository.go
-       │   │   └── RatingResultRepository.go
+       │   │   └── SecurityRepository.ts
+       │   │   └── RatingResultRepository.ts
        │   |
        │   ├── services
        │   │   └── ... cont
-       │
-       └── web
+       |   |
+       ├── functions (optional: orchestrating entry points such as calling event handlers)
+
 ```
 
-You can apply this structure to any other language. Entrypoints will vary based on the calling pattern. As one example, some TypeScript codebases will define a `src/functions` directory for various calling event handlers.
+You can apply this structure to _almost_ any other language. Entrypoints will vary based on the calling pattern.
