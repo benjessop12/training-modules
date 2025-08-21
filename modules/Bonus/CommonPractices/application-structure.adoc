@@ -103,3 +103,74 @@ Clean *TypeScript* services organise code with the following approach:
 ```
 
 You can apply this structure to _almost_ any other language. Entrypoints will vary based on the calling pattern.
+
+Various languages, such as Golang, will reject following this pattern in a strict manner without good reason to implement it. The above structure results in unnecessary complexity as a default stance. Following architectural patterns alone does not solve problems of code organisation. The proposed structure must be thought of as positions of reference and not positions of doctrine. The core idea of clean architecture is to decouple code and simplify testing and refactoring.
+
+Go encourages a flatter project layout where interfaces are implicit. The goals of Clean Architecture are to decouple business logic from infrastructure where Go achieves this with less ceremony. Common Go conventions:
+
+* *Implicit Interfaces*: Interfaces are defined where they are needed, often inside core logic. This avoids creating large `ports` packages unless multiple implementations exist.
+* *Project layout*: Go projects use `cmd/`, `internal/` and `pkg/`, grouping code by feature rather than hexagonal layer.
+* *Dependency injection*: Dependencies are passed explicitly in constructors and wired in `main.go`.
+* *Simplicity*: The maxim 'Accept interfaces, return structs' reflects Go's bias towards simple code and minimal indirection.
+
+An example go implementation, in `internal/securities/app/security_service.go`:
+
+```go
+type securityRepository interface {
+    FindSecurityForAugmentable(ctx context.Context, augmentable Augmentable) (Security, error)
+}
+
+type SecurityService struct {
+    repo securityRepository
+}
+
+func (s SecurityService) AugmentSecurity(ctx context.Context, actor auth.Actor, augmentable Augmentable) AugmentLineage {
+    if actor.Role != "Augmentor" {
+        return errors.Errorf("actor '%s' is trying to augment but cannot.", actor.UUID)
+    }
+
+    augmentResult := AugmentLineage{
+        Augmentable: augmentable,
+        Result: []
+    }
+
+    result, err := s.repo.FindSecurityForAugmentable(ctx, augmentable)
+    if err != nil {
+        augmentResult.Result = [ErrorResult{Result: err}]
+        return augmentResult
+    }
+
+    augmentResult.Result = [SuccessResult{Result: result}]
+    return augmentResult
+}
+```
+
+NOTE: Assume the adapters are defined in `internal/securities/adapters/`.
+
+Now define a constructor in the same file to allow an adapter to be injected:
+
+```go
+func NewSecurityService(
+    repo securityRepository
+) SecurityService {
+    if repo == nil {
+        panic("missing securityRepository")
+    }
+
+    return SecurityService{
+        repo:            repo
+    }
+}
+```
+
+Then in `main.go` inject the adapters:
+
+```go
+securityRepository := adapters.NewPostgresSecurityRepository(client) // Assumed to be defined
+
+securityService := app.NewSecurityService(securityRepository)
+```
+
+The core logic is decoupled from infrastructure details whilst staying idiomatic to Go's preference for simplicity and minimal layering.
+
+As applications grow, you can revisit whether stricter separation is justified. The key is to preserve testability and independence of the core business logic without introducing unnecessary ceremony.
