@@ -1,0 +1,139 @@
+= Augmenting To a Security ( Requirements )
+
+[NOTE]
+====
+Some columns are deliberately incomplete. We will cover these in subsequent sessions.
+
+The final requirement is deliberately vague. This is to test how to handle both:
+
+1. Research
+2. Dealing with incomplete specifications.
+====
+
+[%header,cols="1,2,2,1,1,1"]
+|===
+|Request ID
+|Requirement Description
+|Justification
+|Test Strategy
+|UAT Responsibility
+|Comments
+
+|1
+a|
+Event error triggering is handled externally to the core business logic.
+
+The code written by the software engineer should have no understanding of the broker tooling (be it Kafka or Rabbit, as two examples) and no broker specific dependency should be a part of the project bundle.
+
+Error reporting for event triggering errors is a responsibility of the delivering infrastructure and not the core business logic.
+
+The receiver is a web server accepting incoming events on a designated URL (TBD).
+a|
+1. Simplify the core business logic written by the software engineer.
+2. Allow for easily portable broker tooling.
+3. Treat event delivery as webhook style where watchers provision compute based on incoming requests per second.
+|
+|
+|
+
+|2
+a|
+System inputs (events) are validated prior to processing.
+
+If invalid the receiving server must:
+
+* Increment an observability counter signalling an invalid event has been received.
+* Log *ONLY* the event type and uuid alongside a failure message indicating the event was invalid.
+* Return a 400 error to the delivering connection, which invokes the DLQ logic.
+a|
+1. The act of representing an invalid event is unified across various invalid reasons.
+2. Built for observable architectures.
+|
+|
+|
+
+|3
+a|
+An event is considered invalid when:
+
+* The https://github.com/cloudevents/spec[cloud event specification] is violated.
+* The event envelope does not match the canonical data model.
+* The event does not have associated semantic markers (there is no @context.schema, @id, @type fields).
+a|
+Do not assume event delivery is structured upstream, even in internal systems. Internal systems can break and data clean up is unnecessary burden.
+|
+|
+|
+
+|4
+a|
+Once the event has passed validation, the sequential stages of processing are:
+
+1. Spin up a lineage expectation directed acyclic graph container.
+2. Ensure the described security exists in the world.
+3. Load the security if not present in the system.
+4. Mark the event as ready for rating.
+a|
+Provide a strict responsibility for augmentation; preparing and ensuring the event is valid prior to rating it.
+|
+|
+|
+
+|5
+a|
+The security defined in an event payload is considered existing in the world if:
+
+* It is represented by its https://www.investopedia.com/ask/answers/12/what-is-a-stock-ticker.asp[stock ticker] in the event payload.
+* Retrieving information on the stock ticker via (as one example) https://polygon.io/docs/rest/stocks/tickers/ticker-overview[Polygon's ticker-overview] endpoint returns a 200 response.
+
+If above are not true the receiving server must:
+
+* Increment an observability counter signalling a valid event has been received but the ticker did not exist.
+* Log *ONLY* the event type and uuid alongside a failure message indicating the failure reason.
+* Return a 400 error to the delivering connection, which invokes the DLQ logic.
+a|
+Provide clear, usable data to end users by ensuring augmented events relate to an actual security.
+|
+|
+|
+
+|6
+a|
+Look up if the security has been loaded into the system previously. If yes, continue.
+
+If no:
+
+* Trigger a request to the securities service to load information on the security, signalling the request came from the rating service.
+* Increment the *current* event payloads retry counter by 1.
+** If the retry counter has met the retry limit:
+*** Increment an observability counter signalling a valid event has been received and the ticker failed to load.
+*** Log *ONLY* the event type and uuid alongside a failure message indicating the failure reason.
+*** Return a 400 error to the delivering connection, which invokes the DLQ logic.
+** If the retry counter has not met the retry limit:
+*** Stop processing the *current* event *after* successfully re-submitting the *current* event (with the incremented retry counter) for later processing.
+a|
+Ensure the distributed system is aware of the securities being processed throughout the system and ensure data is synced across services that share concerns.
+|
+|
+|
+
+|7
+a|
+Mark the event as ready for processing.
+
+The system has performed operations which should be represented in the order they occurred. For each operation after validation, inject:
+
+* The operation that was performed
+* The result
+
+into the data lineage expectation container and pass it as an input into the next function.
+
+The directed acyclic graph is the input for functions beyond validation; the original event is included within it's outer container.
+
+Each 400 response *must* include the lineage container, indicating how far the event progressed.
+a|
+Distributed event systems should be observable.
+|
+|
+|
+|===

@@ -1,0 +1,56 @@
+= External Data Domain Glossary
+
+:imagesdir: ../../../images
+
+image::domain-view.png[]
+
+https://link.springer.com/article/10.1057/s41264-022-00161-0/tables/13[Maintain a reference with this source.]
+
+
+[%header,cols="1,1,2"]
+|===
+|Title
+|Domain
+|Description
+
+|Economics
+|Research Data
+a|
+Structured and unstructured data capturing macroeconomic indicators, fiscal and monetary policy signals, geopolitical developments and systematic behavioural patterns that influence market dynamics.
+
+This data is collected, quantified and analyzed to identify causative or correlative relationships between global events and price movements in financial assets.
+
+Examples of core entities:
+
+* Macroeconomic Indicators (GDP, inflation, unemployment, interest rates)
+* Central Bank Communications (policy shifts, meeting minutes, forward guidance)
+* Government Policy Announcements (stimulus packages, regulation)
+* Geopolitical Events (conflicts, elections, trade negotations)
+* Sentiment and Behavioural Economics Signals (consumer confidence, market sentiment indexes)
+
+This domain exists to provide contextual understanding beyond pattern recognition.
+|ESG
+|Research Data
+a|
+Structured and unstructured data capturing non-financial factors related to environmental sustainability, social responsibility and corporate governance that may influence a company's long-term financial performance and market perception.
+
+This data is analysed to assess risk exposure, identify sustainable investment opportunities and understand market reactions to reputational or regulatory shifts.
+
+Examples of core entities:
+
+* Environmental Data (caron emissions, climate risk disclosures, renewable energy adoption)
+* Social Data (labor practices, diversity & inclusion, community impact, supply chain ethics)
+* Governance Data (board composition, executive compensation, shareholder rights, transparency)
+|Industry Fundamental
+|Research Data
+a|
+Describes structure, performance and dynamics of specific economic sectors or market segments. This data is used to benchmark companies, identify cyclical and structural trends and model sector rotation, competitive pressures or regulatory impacts.
+
+Examples of core entities:
+
+* Industry Classification Systems (GICS, NAICS, SIC)
+* Sector Financial Averages (P/E ratios, margins, debt levels)
+* Market Share and Competitive Positioning
+* Regulatory Trends and Policy Changes
+* Technological Disruption or Innovation Cycles
+* Supply Chain and Input Cost Dynamics

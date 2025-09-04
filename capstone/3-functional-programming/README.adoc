@@ -1,0 +1,27 @@
+= 🧱 Capstone Project Session Three: Functional Programming
+
+:imagesdir: ./images
+
+NOTE: *I've not published the updates to this document yet. Come back later!*
+
+[NOTE]
+====
+Changes since the last session:
+
+====
+
+TIP: ↩️ Complete the link:../../modules/TechnicalFoundations/FunctionalProgramming/README.adoc[Functional Programming module] before starting this session.
+
+---
+
+== Setting the Scene
+
+
+== Session Two Ask
+
+
+== Guidance
+
+
+== Steps
+

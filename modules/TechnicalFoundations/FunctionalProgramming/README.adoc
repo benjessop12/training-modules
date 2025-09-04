@@ -1,0 +1,264 @@
+= Functional Programming
+
+:fn-communicating-sequential-processes: footnote:communicating-sequential-processes[CSP is a formal model for concurrency introduced by Tony Hoare in the 1970s. Instead of sharing memory directly, concurrent processes communicate by passing messages. Each process runs independently within it's own control flow and communication happens over channels. Golang makes this practical; *goroutines* are the processes and *channels* are the communication medium.]
+
+A large number of problems you solve with code can be distilled down to figuring out how to represent and manipulate data you have access to. Paradigms exist to provide _guidance_ in how to structure code in an effort to avoid poor data and code structure which often results in difficult-to-maintain code.
+
+Previously we discussed Object Oriented Programming as one paradigm providing a noun-centric manner of thinking of data; the coder defines objects that can be mutated via methods whilst maintaining the invariants of the data. Functional Programming provides a verb-centric manner of thinking of data; chaining and composing functions, leaving data immutable and working against copies of the original state.
+
+Here's a simple OOP example:
+
+```go
+type Document struct {
+  Text string
+}
+
+func (d *Document) ToUpper() {
+  d.Text = strings.ToUpper(d.Text)
+}
+
+func (d *Document) AddExclamation() {
+  d.Text = d.Text + "!"
+}
+
+func main() {
+  doc := &Document{Text: "Hello there"}
+  doc.ToUpper()
+  doc.AddExclamation()
+  fmt.Println(doc.Text) // HELLO THERE!
+}
+```
+
+Here's the same in a functional style:
+
+```go
+type StringFn func(string) string
+
+func Chain(fns ...StringFn) StringFn {
+  return func(s string) string {
+    for _, fn := range fns {
+      s = fn(s)
+    }
+    return s
+  }
+}
+
+func ToUpper(s string) string {
+  return strings.ToUpper(s)
+}
+
+func AddExclamation(s string) string {
+  return s + "!"
+}
+
+func main() {
+  transform := Chain(ToUpper, AddExclamation)
+
+  original := "Hello there"
+  result := transform(original)
+
+  fmt.Println(result) // HELLO THERE!
+}
+```
+
+The concepts are explained in detail further on in this document. This example serves the purpose of highlighting the differences between the paradigms. In the functional example, functions are treated as first-classes citizens, composition allows the transformation to be built where each step is a _verb_ and the original value is never modified. The result is an easily comprehendible unidirectional pipeline that can be applied to _generally_ solve any computational problem, including modelling changing state, IO, etc. This contrasts sharply with class-based designs, which center on modelling problems as mutable objects.
+
+Before we continue, it is important to note both paradigms can be used together; a good approach to writing software is to listen to the underlying principles of a paradigm and apply them where they make most sense. It's hard to state _x_ language should be written in _y_ paradigm as the definitions of a certain paradigm are open to interpretation to the point where attempting to keep code true to any one paradigm is wasted effort. However, it is true certain languages direct the programmer to thinking in a certain style. Go, as one example, is not suited for strict OOP nor Functional Programming due to being designed around communicating sequential processes{fn-communicating-sequential-processes}, where stateful processes exchange immutable messages. Without going too far down the rabbit hole; avoid being pedantic and instead focus on writing maintainable code.
+
+> Programs are meant to be read by humans and only incidentally for computers to execute.
+
+The principles behind Functional Programming focus on assisting humans when attempting to understand code, with minimal cognitive overhead. This is often achieved with allowing for reasoning of code the same way we reason about equations; no temporal side effects where possible and if they are required explicitly placing them within a well defined boundary.
+
+Here's a non-exhaustive list of concepts that are related to the functional programming paradigm:
+
+== Composition
+
+Things that are composable enable abstractions, meaning they enable programmers to reason about code without having to care about the details, reducing the cognitive burden to understand code. A common example of composition is through pipes:
+
+```ts
+import { pipe } from "effect"
+
+const result = pipe(input, func1, func2, ..., funcN)
+```
+
+In this syntax, `input` is the initial value and `func1`, `func2`, ..., `funcN` are the functions to be applied in sequence. The result of each function is the input for the next function and the final result is returned. NOTE: Each function takes a single argument. This allows small pieces of code performing restricted tasks to build more complex functionality by routing outputs and inputs appropriately.
+
+== High Order Functions
+
+Many languages offer high order functions as part of their standard libraries. For example, JavaScripts `map` function is a high order function where the parameter is an argument: `users.map(u => u.name)`. Functions accepting functions are often written when providing a package, allowing the package user to define custom logic with no requirement for the package maintainer to know about the implementation.
+
+Here's one example in Go:
+
+```go
+func filter(numbers []int, f func(int) bool) []int {
+  var result []int
+
+  for _, value := range numbers {
+    if f(value) {
+      result = append(result, value)
+    }
+  }
+
+  return result
+}
+
+func isEven(n int) bool {
+  return n % 2 == 0
+}
+
+func main() {
+  numbers := []int{1, 2, 3, 4}
+  even := filter(numbers, isEven)
+  fmt.Println(even) // [2, 4]
+}
+```
+
+== Currying
+
+Currying breaks down an original function taking _n_ arguments into a series of _n_ functions that each take one argument and produce the same result as the original function.
+
+```go
+func add(a int) func(int) int {
+  return func(b int) int {
+    return a + b
+  }
+}
+
+func main() {
+  addOne := add(1)
+  fmt.Println(addOne(2)) // 3
+}
+```
+
+This enables flexible functions, attaching additional pieces of information as they become available.
+
+== Immutability
+
+Mutable code is hard to reason when a value can be changed by another, unrelated section of a program. Immutability, by contrast, makes reasoning simpler: programs can be modelled as collections of _functions_ where outputs depend on inputs. When values cannot be altered, there are fewer moving parts.
+
+In Go, immutability is supported naturally when passing values by copy to functions or methods; receivers work with their own copy leaving the original value unchanged.
+
+```go
+type Account struct {
+  Balance int
+}
+
+func (a Account) Deposit(amount int) Account {
+  a.Balance += amount
+  return a
+}
+
+func main() {
+  original := Account{Balance: 100}
+
+  updated := original.Deposit(50)
+
+  fmt.Println("Original:", original.Balance) // 100
+  fmt.Println("Updated:", updated.Balance)
+}
+```
+
+NOTE: You may have concerns with memory overhead with the above approach. Remember small values are cheap to copy. Golang, for example, is designed with value semantics in mind; copying small structs is fast and efficient. For most domain models immutability-by-copy is a simple and idiomatic approach. The compiler can determine if a copy is 'too big', deciding to allocate it on the heap instead of multiple stack allocations, resulting in low overhead. Very large structs should use pointers carefully to avoid copying large data structures unnecessarily. The trade-off decision is one of _clarity_ versus _cost_ (bugs versus memory consumption, as one example).
+
+== Pure Functions
+
+Pure functions do not alter anything outside of their scope.
+
+```go
+func square(x int) int {
+  return x * x
+}
+
+func main() {
+  fmt.Println(square(5))
+}
+```
+
+This supports the immutability concept above.
+
+== Functors
+
+A functor is a mapping between two categories; taking an input of one category and producing an output to another category, preserving identity and composition. In short, it allows the user to apply a function to the inner context of a _type_ being able to change the values without changing structure.
+
+Here's a simple example:
+
+```go
+// Maybe is a type that may or may not hold a value
+type Maybe[T any] struct {
+  val *T
+}
+
+// Author Omission:
+// Regularly this would produce a different type. Think func Map[T, U, any] (m Maybe[T], f func(T) U) Maybe[U]
+// Think how to reflect that in a simple way.
+func (m Maybe[T]) Map(f func(T) T) Maybe[T] {
+  if m.val == nil {
+    return m // Preserve 'Nothing'
+  }
+
+  newVal := f(*m.val)
+  return Maybe[T]{val: &newVal}
+}
+
+func ptr[T any](v T) *T { return &v }
+
+func main() {
+  m1 := Maybe[int]{val: ptr(10)}
+
+  m2 := m1.Map(func(x int) int { return x + 5 })
+
+  fmt.Println(*m1.val) // 10
+  fmt.Println(*m2.val) // 15
+
+  var none Maybe[int]
+  none2 := none.Map(func (x int) int { return x + 5 })
+  fmt.Println(none2.val == nil) // true
+}
+```
+
+In this example the functor has a container that remains unchanged. A `Maybe` stays a `Maybe` whether or not there is a value; the inner values can change without changing the structure.
+
+== Monads
+
+A Monad is a type of Functor, the difference being a Monad only accepts functions that return other Monads. They enable functional compositions, applying a sequential step on a result of a previous step and applying some logic around it, if defined.
+
+Expanding on the above example, introducing `Bind`:
+
+```go
+// Bind applies a function that returns another Maybe
+func (m Maybe[T]) Bind(f func(T) Maybe[T]) Maybe[T] {
+  if m.val == nil {
+    return m
+  }
+  return f(*m.val)
+}
+
+func main() {
+  // assuming the prior example values are defined
+
+  halfIfEven := func(x int) Maybe[int] {
+    if x % 2 == 0 {
+      return Maybe[int]{val: ptr(x / 2)}
+    }
+    return Maybe[int]{val: nil}
+  }
+
+  result1 := m1.Bind(halfIfEven) // as m1 = 10.
+  result2 := m1.Bind(halfIfEven).Bind(halfIfEven) // 'No result' as m1 being rebound returns a nil on the second pass.
+
+  noneResult := none.Bind(halfIfEven) // nil
+}
+```
+
+The `Bind` Monad transforms the inner value however the function itself returns another container ( `Maybe` ), allowing the operation chaining that can fail or produce no value, without breaking composition.
+
+== Closing
+
+Most notably with the last example, it is reasonable to question to necessity for these abstractions. The simple answer is that they are not required to program. Monads, as one example, exist with reason; patterns of computation form monadic structures. Abstracting the structure allows for writing code that works across all instances of a structure. Monads enable composition due to minimal syntatic or semantic overhead in defining chains where inputs vary.
+
+[NOTE]
+====
+_Authors Note_
+
+Entering a job where you write code in a language that isn't Haskell-like under a purely Functional style *is not recommended.* Prefer idiomatic approaches, applying the underlying principles of a paradigm and explain the _why_ rather than imposing the paradigm on your coworkers. Composition and immutability are more tangible to programmers unfamiliar with functional programming than trying to make every function a monad. Use your judgement.
+====
