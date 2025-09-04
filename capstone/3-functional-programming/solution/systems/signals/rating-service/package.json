@@ -1,0 +1,36 @@
+{
+  "name": "rating-service",
+  "version": "0.0.0",
+  "description": "The rating service.",
+  "main": "dist/index.js",
+  "module": "dist/src/index.d.ts",
+  "types": "dist/src/index.d.ts",
+  "scripts": {
+    "build": "tsc src/**/*.ts --downlevelIteration",
+    "compile": "tsc -p .",
+    "test": "npm run compile && env-cmd -f ./src/.env vitest run",
+    "prepare": "husky"
+  },
+  "keywords": [],
+  "author": "benjessop12",
+  "license": "MIT",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/node": "^24.2.1",
+    "@vitest/coverage-istanbul": "^3.2.4",
+    "env-cmd": "^10.1.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.5",
+    "prettier": "^3.6.2",
+    "prettier-plugin-multiline-arrays": "^4.0.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "lint-staged": {
+    "*.{js,ts}": "prettier-write"
+  },
+  "dependencies": {
+    "tsyringe": "^4.10.0"
+  }
+}
